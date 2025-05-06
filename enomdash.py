@@ -4,6 +4,7 @@ import numpy as np
 import plotly.express as px
 import random
 import calendar
+from datetime import datetime
 
 # --- Streamlit page config ---
 st.set_page_config(page_title="ENOM Dashboard", layout="wide")
@@ -56,6 +57,8 @@ def load_data_ava_monthly():
     return clean_month(regional), clean_month(nop), clean_month(site)
 
 regional_data, nop_data, site_data = load_data_ava_monthly()
+
+last_updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # --- Chart Function ---
 def plot_line_chart(df, group_col, filters, base_title, y_range):
@@ -302,6 +305,11 @@ if st.session_state.page == "📈 ENOM KPI":
             xaxis_title="Month",
             yaxis_title="Final KPI",
             hovermode="closest"
+            title={
+                "text": f"Availability Chart<br><sup>Last updated: {last_updated}</sup>",
+                "x": 0.5,
+                "xanchor": "center"
+            }
         )
 
         # Show data labels on hover

@@ -5,7 +5,7 @@ import plotly.express as px
 import random
 
 # Set Streamlit page config
-st.set_page_config(page_title="ENOM Availability Dashboard", layout="wide")
+st.set_page_config(page_title="ENOM Dashboard", layout="wide")
 
 # --- Load Data ---
 @st.cache_data
@@ -105,7 +105,7 @@ tab1, tab2, tab3 = st.tabs(["📍 Regional", "🏢 NOP", "📡 Site"])
 
 # --- Regional Tab ---
 with tab1:
-    st.header("Monthly Availability per Regional")
+    st.header("Monthly Availability Trend per Regional")
 
     area_list = ["All"] + sorted(regional_data['area'].dropna().unique())
     regional_filtered = regional_data.copy()
@@ -128,7 +128,7 @@ with tab1:
 
 # --- NOP Tab ---
 with tab2:
-    st.header("Monthly Availability per NOP")
+    st.header("Monthly Availability Trend per NOP")
 
     area_list = ["All"] + sorted(nop_data['area'].dropna().unique())
     nop_filtered = nop_data.copy()
@@ -161,7 +161,7 @@ with tab2:
 
 # --- Site Tab ---
 with tab3:
-    st.header("Monthly Availability per Site")
+    st.header("Monthly Availability Trend per Site")
 
     area_list = ["All"] + sorted(site_data['area'].dropna().unique())
     site_filtered = site_data.copy()

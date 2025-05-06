@@ -178,7 +178,7 @@ if st.session_state.page == "📈 ENOM KPI":
             elif 80 <= val < 85:
                 color = 'background-color: orange'
             elif 85 <= val < 90:
-                color = 'background-color: lightgreen'
+                color = 'background-color: #92D050'
             elif 90 <= val < 95:
                 color = 'background-color: #00B050'
             elif val >= 95:

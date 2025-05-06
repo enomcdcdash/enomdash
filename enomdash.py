@@ -111,15 +111,15 @@ def plot_line_chart(df, group_col, filters, base_title, y_range):
 
 # --- Main Content: ENOM KPI Placeholder ---
 if st.session_state.page == "📈 ENOM KPI":
-    st.title("📈 ENOM KPI Dashboard")
+    st.title("📈 ENOM KPI SONL1")
 
     # Create tabs
-    tab1, tab2 = st.tabs(["📈 ENOM KPI", "📊 KPI Trend"])
+    tab1, tab2 = st.tabs(["📈 ENOM KPI SONL1", "📊 Trend KPI SONL1"])
 
     # Load KPI data
     df_kpi = load_kpi_data()
     with tab1:
-        st.subheader("📈 ENOM KPI Dashboard")
+        st.subheader("📈 ENOM KPI SONL1")
     
         # --- Filters ---
         col1, col2, col3, col4, col5 = st.columns(5)
@@ -235,7 +235,7 @@ if st.session_state.page == "📈 ENOM KPI":
 
     # --- Tab 2: KPI Trend ---
     with tab2:
-        st.subheader("📊 KPI Trend Dashboard")
+        st.subheader("📊 Trend KPI SONL1")
         df_kpi_trend = df_kpi.copy()
 
         # --- Create cascading filters ---

@@ -20,7 +20,7 @@ with st.sidebar:
 # --- Load Data for ENOM KPI ---
 @st.cache_data
 def load_kpi_data():
-    df = pd.read_excel("data/enom_kpi.xlsx", sheet_name="KPI")
+    df = pd.read_excel("C:/Ariya Data/python/enomdashboard/data/enom_kpi.xlsx", sheet_name="KPI")
     
     # Parse Period_str into Month and Year
     df["Period_str"] = df["Period_str"].astype(str).str.strip()
@@ -36,9 +36,9 @@ def load_data_ava_monthly():
         df['Month'] = df['Month'].astype(str).str.strip().str[:3].str.title()
         return df
 
-    regional = pd.read_csv("data/availability_regional.csv")
-    nop = pd.read_csv("data/availability_nop.csv")
-    site = pd.read_csv("data/availability_site.csv")
+    regional = pd.read_csv("C:/Ariya Data/python/enomdashboard/data/availability_regional.csv")
+    nop = pd.read_csv("C:/Ariya Data/python/enomdashboard/data/availability_nop.csv")
+    site = pd.read_csv("C:/Ariya Data/python/enomdashboard/data/availability_site.csv")
 
     return clean_month(regional), clean_month(nop), clean_month(site)
 
@@ -101,120 +101,130 @@ def plot_line_chart(df, group_col, filters, base_title, y_range):
 if selected_page == "📈 ENOM KPI":
     st.title("📈 ENOM KPI Dashboard")
 
+    # Create tabs
+    tab1, tab2 = st.tabs(["📈 ENOM KPI", "📊 KPI Trend"])
+
     # Load KPI data
     df_kpi = load_kpi_data()
-
-    # --- Filters ---
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    # Start with full dataset for filtering
-    filter_df = df_kpi.copy()
-
-    with col1:
-        area_list = ["All"] + sorted(filter_df["Area"].dropna().unique())
-        selected_area = st.selectbox("Select Area", area_list)
-
-    # Apply Area filter first
-    if selected_area != "All":
-        filter_df = filter_df[filter_df["Area"] == selected_area]
-
-    with col2:
-        regional_list = ["All"] + sorted(filter_df["Regional"].dropna().unique())
-        selected_regional = st.selectbox("Select Regional", regional_list)
-
-    # Apply Regional filter next
-    if selected_regional != "All":
-        filter_df = filter_df[filter_df["Regional"] == selected_regional]
-
-    with col3:
-        nop_list = ["All"] + sorted(filter_df["NOP"].dropna().unique())
-        selected_nop = st.selectbox("Select NOP", nop_list)
-
-    # Apply NOP filter
-    if selected_nop != "All":
-        filter_df = filter_df[filter_df["NOP"] == selected_nop]
-
-    # Define the calendar order of months
-    month_order = list(calendar.month_abbr)[1:]  # ['Jan', 'Feb', ..., 'Dec']
-    unique_months = filter_df["Month"].dropna().unique()
-    sorted_months = sorted(unique_months, key=lambda x: month_order.index(x))
-
-    with col4:
-        month_list = ["All"] + sorted_months
-        selected_month = st.selectbox("Select Month", month_list)
-
-    if selected_month != "All":
-        filter_df = filter_df[filter_df["Month"] == selected_month]
-
-    with col5:
-        year_list = ["All"] + sorted(filter_df["Year"].dropna().unique())
-        selected_year = st.selectbox("Select Year", year_list)
-
-    if selected_year != "All":
-        filter_df = filter_df[filter_df["Year"] == selected_year]
-
-    # Define a function to apply the background colors based on the value
-    def color_final_kpi(val):
-        color = ''
-        if val < 80:
-            color = 'background-color: #FF0000'
-        elif 80 <= val < 85:
-            color = 'background-color: orange'
-        elif 85 <= val < 90:
-            color = 'background-color: lightgreen'
-        elif 90 <= val < 95:
-            color = 'background-color: #00B050'
-        elif val >= 95:
-            color = 'background-color: #00B0F0'
-        return color
+    with tab1:
+        st.subheader("📈 ENOM KPI Dashboard")
     
-    # Apply the conditional formatting only to the "Final KPI" column
-    def apply_conditional_formatting(df):
-        styled_df = df.style.applymap(color_final_kpi, subset=['Final KPI'])
-        return styled_df
+        # --- Filters ---
+        col1, col2, col3, col4, col5 = st.columns(5)
 
-    # Final filtered dataframe
-    filtered_df = filter_df
+        # Start with full dataset for filtering
+        filter_df = df_kpi.copy()
 
-    # --- Columns to Display --- 
-    columns_to_show = [
-        "NOP", "Period_str", "Final KPI", "KPI A", "KPI B", "A1", "A2", "A3", "A4", "A5", "A6",
-        "B1", "B2.1", "B2.2", "B2.3", "B3", "B4.1", "B4.2", "B5.1", "B5.2"
-    ]
+        with col1:
+            area_list = ["All"] + sorted(filter_df["Area"].dropna().unique())
+            selected_area = st.selectbox("Select Area", area_list)
 
-    # Select the columns to show
-    display_df = filtered_df[columns_to_show].reset_index(drop=True)
+        # Apply Area filter first
+        if selected_area != "All":
+            filter_df = filter_df[filter_df["Area"] == selected_area]
 
-    # Round the selected columns to 2 decimal places and format them
-    display_df[columns_to_show] = display_df[columns_to_show].applymap(lambda x: "{:.2f}".format(x) if isinstance(x, (int, float)) else x)
+        with col2:
+            regional_list = ["All"] + sorted(filter_df["Regional"].dropna().unique())
+            selected_regional = st.selectbox("Select Regional", regional_list)
 
-    # Convert 'Final KPI' to numeric and round it to 2 decimal places
-    display_df['Final KPI'] = pd.to_numeric(display_df['Final KPI'], errors='coerce').round(2)
+        # Apply Regional filter next
+        if selected_regional != "All":
+            filter_df = filter_df[filter_df["Regional"] == selected_regional]
 
-    # Start the index from 1 instead of 0
-    display_df.index += 1
+        with col3:
+            nop_list = ["All"] + sorted(filter_df["NOP"].dropna().unique())
+            selected_nop = st.selectbox("Select NOP", nop_list)
 
-    # Apply the conditional formatting to the 'Final KPI' column
-    styled_df = display_df.style.applymap(color_final_kpi, subset=['Final KPI']).format({'Final KPI': "{:.2f}"})
+        # Apply NOP filter
+        if selected_nop != "All":
+            filter_df = filter_df[filter_df["NOP"] == selected_nop]
 
-    # Show the table in the Streamlit app without additional styling
-    st.dataframe(styled_df, use_container_width=True)
+        # Define the calendar order of months
+        month_order = list(calendar.month_abbr)[1:]  # ['Jan', 'Feb', ..., 'Dec']
+        unique_months = filter_df["Month"].dropna().unique()
+        sorted_months = sorted(unique_months, key=lambda x: month_order.index(x))
 
-    # --- Download as Excel ---
-    import io
+        with col4:
+            month_list = ["All"] + sorted_months
+            selected_month = st.selectbox("Select Month", month_list)
 
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        display_df.to_excel(writer, index=False, sheet_name='ENOM_KPI')
+        if selected_month != "All":
+            filter_df = filter_df[filter_df["Month"] == selected_month]
+
+        with col5:
+            year_list = ["All"] + sorted(filter_df["Year"].dropna().unique())
+            selected_year = st.selectbox("Select Year", year_list)
+
+        if selected_year != "All":
+            filter_df = filter_df[filter_df["Year"] == selected_year]
+
+        # Define a function to apply the background colors based on the value
+        def color_final_kpi(val):
+            color = ''
+            if val < 80:
+                color = 'background-color: #FF0000'
+            elif 80 <= val < 85:
+                color = 'background-color: orange'
+            elif 85 <= val < 90:
+                color = 'background-color: lightgreen'
+            elif 90 <= val < 95:
+                color = 'background-color: #00B050'
+            elif val >= 95:
+                color = 'background-color: #00B0F0'
+            return color
+    
+        # Apply the conditional formatting only to the "Final KPI" column
+        def apply_conditional_formatting(df):
+                styled_df = df.style.applymap(color_final_kpi, subset=['Final KPI'])
+                return styled_df
+
+        # Final filtered dataframe
+        filtered_df = filter_df
+
+        # --- Columns to Display --- 
+        columns_to_show = [
+            "NOP", "Period_str", "Final KPI", "KPI A", "KPI B", "A1", "A2", "A3", "A4", "A5", "A6",
+            "B1", "B2.1", "B2.2", "B2.3", "B3", "B4.1", "B4.2", "B5.1", "B5.2"
+        ]
+
+        # Select the columns to show
+        display_df = filtered_df[columns_to_show].reset_index(drop=True)
+
+        # Round the selected columns to 2 decimal places and format them
+        display_df[columns_to_show] = display_df[columns_to_show].applymap(lambda x: "{:.2f}".format(x) if isinstance(x, (int, float)) else x)
+
+        # Convert 'Final KPI' to numeric and round it to 2 decimal places
+        display_df['Final KPI'] = pd.to_numeric(display_df['Final KPI'], errors='coerce').round(2)
+
+        # Start the index from 1 instead of 0
+        display_df.index += 1
+
+        # Apply the conditional formatting to the 'Final KPI' column
+        styled_df = display_df.style.applymap(color_final_kpi, subset=['Final KPI']).format({'Final KPI': "{:.2f}"})
+
+        # Show the table in the Streamlit app without additional styling
+        st.dataframe(styled_df, use_container_width=True)
+
+        # --- Download as Excel ---
+        import io
+
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            display_df.to_excel(writer, index=False, sheet_name='ENOM_KPI')
         
-    processed_data = output.getvalue()
+        processed_data = output.getvalue()
 
-    st.download_button(
-        label="📥 Save to Excel File",
-        data=processed_data,
-        file_name="ENOM_KPI_Filtered.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+        st.download_button(
+            label="📥 Save to Excel File",
+            data=processed_data,
+            file_name="ENOM_KPI_Filtered.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+    # --- Tab 2: KPI Trend ---
+    with tab2:
+        st.subheader("📊 KPI Trend Dashboard")
+        st.info("This section is under development.")
 
 # --- Main Content: Monthly Availability ---
 elif selected_page == "📅 Monthly Availability":

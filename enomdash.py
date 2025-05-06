@@ -317,6 +317,7 @@ if st.session_state.page == "📈 ENOM KPI":
 
         # Display the chart in Streamlit
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown(f"**Last updated:** {last_updated}")
 
 # --- Main Content: Monthly Availability ---
 elif st.session_state.page == "📅 Monthly Availability":

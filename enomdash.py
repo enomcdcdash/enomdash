@@ -8,19 +8,32 @@ import calendar
 # --- Streamlit page config ---
 st.set_page_config(page_title="ENOM Dashboard", layout="wide")
 
-# --- Sidebar Navigation ---
+# --- Sidebar Navigation (Custom Buttons) ---
 with st.sidebar:
-    st.title("📊 ENOM Dashboard")
-    selected_page = st.radio(
-        label="",
-        options=["📈 ENOM KPI", "📅 Monthly Availability"],
-        label_visibility="collapsed"
-    )
+    st.markdown("<h2 style='text-align: center;'>📊 ENOM Dashboard</h2>", unsafe_allow_html=True)
+    st.markdown("---")  # horizontal line
+
+    # Initialize session state
+    if "page" not in st.session_state:
+        st.session_state.page = "📈 ENOM KPI"
+
+    # Use one column to stack buttons vertically
+    col = st.container()
+    with col:
+        kpi_clicked = st.button("📈 ENOM KPI", use_container_width=True)
+        availability_clicked = st.button("📅 Monthly Availability", use_container_width=True)
+
+
+    # Update session state based on button clicked
+    if kpi_clicked:
+        st.session_state.page = "📈 ENOM KPI"
+    elif availability_clicked:
+        st.session_state.page = "📅 Monthly Availability"
 
 # --- Load Data for ENOM KPI ---
 @st.cache_data
 def load_kpi_data():
-    df = pd.read_excel("data/enom_kpi.xlsx", sheet_name="KPI")
+    df = pd.read_excel("C:/Ariya Data/python/enomdashboard/data/enom_kpi.xlsx", sheet_name="KPI")
     
     # Parse Period_str into Month and Year
     df["Period_str"] = df["Period_str"].astype(str).str.strip()
@@ -36,9 +49,9 @@ def load_data_ava_monthly():
         df['Month'] = df['Month'].astype(str).str.strip().str[:3].str.title()
         return df
 
-    regional = pd.read_csv("data/availability_regional.csv")
-    nop = pd.read_csv("data/availability_nop.csv")
-    site = pd.read_csv("data/availability_site.csv")
+    regional = pd.read_csv("C:/Ariya Data/python/enomdashboard/data/availability_regional.csv")
+    nop = pd.read_csv("C:/Ariya Data/python/enomdashboard/data/availability_nop.csv")
+    site = pd.read_csv("C:/Ariya Data/python/enomdashboard/data/availability_site.csv")
 
     return clean_month(regional), clean_month(nop), clean_month(site)
 
@@ -96,10 +109,9 @@ def plot_line_chart(df, group_col, filters, base_title, y_range):
     fig.update_traces(textposition="bottom center", showlegend=True)
     st.plotly_chart(fig, use_container_width=True)
 
-
 # --- Main Content: ENOM KPI Placeholder ---
-if selected_page == "📈 ENOM KPI":
-    st.title("📈 ENOM KPI SONL1")
+if st.session_state.page == "📈 ENOM KPI":
+    st.title("📈 ENOM KPI Dashboard")
 
     # Create tabs
     tab1, tab2 = st.tabs(["📈 ENOM KPI", "📊 KPI Trend"])
@@ -107,7 +119,7 @@ if selected_page == "📈 ENOM KPI":
     # Load KPI data
     df_kpi = load_kpi_data()
     with tab1:
-        st.subheader("📈 ENOM KPI SONL1")
+        st.subheader("📈 ENOM KPI Dashboard")
     
         # --- Filters ---
         col1, col2, col3, col4, col5 = st.columns(5)
@@ -223,11 +235,83 @@ if selected_page == "📈 ENOM KPI":
 
     # --- Tab 2: KPI Trend ---
     with tab2:
-        st.subheader("📊 KPI SONL1 Trend")
-        st.info("This section is under development.")
+        st.subheader("📊 KPI Trend Dashboard")
+        df_kpi_trend = df_kpi.copy()
+
+        # --- Create cascading filters ---
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            area_list = ["All"] + sorted(df_kpi_trend["Area"].dropna().unique())
+            selected_area = st.selectbox("Select Area", area_list, key="trend_area")
+
+        with col2:
+            regional_filtered = df_kpi_trend[df_kpi_trend["Area"] == selected_area] if selected_area != "All" else df_kpi_trend
+            regional_list = ["All"] + sorted(regional_filtered["Regional"].dropna().unique())
+            selected_regional = st.selectbox("Select Regional", regional_list, key="trend_regional")
+
+        with col3:
+            nop_filtered = regional_filtered[regional_filtered["Regional"] == selected_regional] if selected_regional != "All" else regional_filtered
+            nop_list = ["All"] + sorted(nop_filtered["NOP"].dropna().unique())
+            selected_nop = st.selectbox("Select NOP", nop_list, key="trend_nop")
+
+        filters = {
+            "Area": selected_area,
+            "Regional": selected_regional,
+            "NOP": selected_nop
+        }
+
+        # --- Apply filters from dict ---
+        filtered_df = df_kpi_trend.copy()
+        if filters["Area"] != "All":
+            filtered_df = filtered_df[filtered_df["Area"] == filters["Area"]]
+        if filters["Regional"] != "All":
+            filtered_df = filtered_df[filtered_df["Regional"] == filters["Regional"]]
+        if filters["NOP"] != "All":
+            filtered_df = filtered_df[filtered_df["NOP"] == filters["NOP"]]
+
+        # --- Parse Month for proper ordering ---
+        try:
+            filtered_df["Month_dt"] = pd.to_datetime(filtered_df["Period_str"], format="%b-%y", errors="coerce")
+            filtered_df = filtered_df.dropna(subset=["Month_dt"]).sort_values("Month_dt")
+        except Exception as e:
+            st.error(f"Error parsing 'Period_str' column: {e}")
+            st.stop()
+
+        # --- Choose dynamic group column: if NOP is filtered, group by Regional; else by NOP ---
+        if filters["NOP"] != "All":
+            group_col = "Regional"
+        elif filters["Regional"] != "All":
+            group_col = "NOP"
+        else:
+            group_col = "NOP"  # default
+
+        # --- Plot KPI Trend ---
+        fig = px.line(
+            filtered_df,
+            x="Month",
+            y="Final KPI",
+            color=group_col,
+            markers=True,
+            title="Trend KPI SONL1",
+            text="Final KPI"  # Add the text label at each data point
+        )
+
+        fig.update_layout(
+            yaxis_range=[70, 100],
+            xaxis_title="Month",
+            yaxis_title="Final KPI",
+            hovermode="x unified"
+        )
+
+        # Show data labels on hover
+        fig.update_traces(textposition="bottom center", texttemplate="%{text:.2f}")  # Adjust text position and format
+
+        # Display the chart in Streamlit
+        st.plotly_chart(fig, use_container_width=True)
 
 # --- Main Content: Monthly Availability ---
-elif selected_page == "📅 Monthly Availability":
+elif st.session_state.page == "📅 Monthly Availability":
     st.title("📅 Monthly Availability")
 
     tab1, tab2, tab3 = st.tabs(["📍 Regional", "🏢 NOP", "📡 Site"])

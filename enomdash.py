@@ -20,7 +20,7 @@ with st.sidebar:
     # Use one column to stack buttons vertically
     col = st.container()
     with col:
-        kpi_clicked = st.button("📈 ENOM KPI", use_container_width=True)
+        kpi_clicked = st.button("📈 ENOM KPI SONL1", use_container_width=True)
         availability_clicked = st.button("📅 Monthly Availability", use_container_width=True)
 
 

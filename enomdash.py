@@ -153,6 +153,26 @@ if selected_page == "📈 ENOM KPI":
     if selected_year != "All":
         filter_df = filter_df[filter_df["Year"] == selected_year]
 
+    # Define a function to apply the background colors based on the value
+    def color_final_kpi(val):
+        color = ''
+        if val < 80:
+            color = 'background-color: #FF0000'
+        elif 80 <= val < 85:
+            color = 'background-color: orange'
+        elif 85 <= val < 90:
+            color = 'background-color: lightgreen'
+        elif 90 <= val < 95:
+            color = 'background-color: #00B050'
+        elif val >= 95:
+            color = 'background-color: #00B0F0'
+        return color
+    
+    # Apply the conditional formatting only to the "Final KPI" column
+    def apply_conditional_formatting(df):
+        styled_df = df.style.applymap(color_final_kpi, subset=['Final KPI'])
+        return styled_df
+
     # Final filtered dataframe
     filtered_df = filter_df
 
@@ -165,14 +185,20 @@ if selected_page == "📈 ENOM KPI":
     # Select the columns to show
     display_df = filtered_df[columns_to_show].reset_index(drop=True)
 
-    # Round the selected columns to 2 decimal places
-    display_df[columns_to_show] = display_df[columns_to_show].applymap(lambda x: round(x, 2) if isinstance(x, (int, float)) else x)
+    # Round the selected columns to 2 decimal places and format them
+    display_df[columns_to_show] = display_df[columns_to_show].applymap(lambda x: "{:.2f}".format(x) if isinstance(x, (int, float)) else x)
+
+    # Convert 'Final KPI' to numeric and round it to 2 decimal places
+    display_df['Final KPI'] = pd.to_numeric(display_df['Final KPI'], errors='coerce').round(2)
 
     # Start the index from 1 instead of 0
     display_df.index += 1
 
-    # Show the table in the Streamlit app
-    st.dataframe(display_df, use_container_width=True)
+    # Apply the conditional formatting to the 'Final KPI' column
+    styled_df = display_df.style.applymap(color_final_kpi, subset=['Final KPI']).format({'Final KPI': "{:.2f}"})
+
+    # Show the table in the Streamlit app without additional styling
+    st.dataframe(styled_df, use_container_width=True)
 
     # --- Download as Excel ---
     import io

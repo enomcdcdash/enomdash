@@ -301,7 +301,7 @@ if st.session_state.page == "📈 ENOM KPI":
             yaxis_range=[70, 100],
             xaxis_title="Month",
             yaxis_title="Final KPI",
-            hovermode="x unified"
+            hovermode="closest"
         )
 
         # Show data labels on hover

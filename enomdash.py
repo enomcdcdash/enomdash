@@ -99,7 +99,7 @@ def plot_line_chart(df, group_col, filters, base_title, y_range):
 
 # --- Main Content: ENOM KPI Placeholder ---
 if selected_page == "📈 ENOM KPI":
-    st.title("📈 ENOM KPI Dashboard")
+    st.title("📈 ENOM KPI SONL1")
 
     # Create tabs
     tab1, tab2 = st.tabs(["📈 ENOM KPI", "📊 KPI Trend"])
@@ -107,7 +107,7 @@ if selected_page == "📈 ENOM KPI":
     # Load KPI data
     df_kpi = load_kpi_data()
     with tab1:
-        st.subheader("📈 ENOM KPI Dashboard")
+        st.subheader("📈 ENOM KPI SONL1")
     
         # --- Filters ---
         col1, col2, col3, col4, col5 = st.columns(5)
@@ -223,7 +223,7 @@ if selected_page == "📈 ENOM KPI":
 
     # --- Tab 2: KPI Trend ---
     with tab2:
-        st.subheader("📊 KPI Trend Dashboard")
+        st.subheader("📊 KPI SONL1 Trend")
         st.info("This section is under development.")
 
 # --- Main Content: Monthly Availability ---

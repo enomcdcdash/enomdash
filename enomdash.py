@@ -304,7 +304,7 @@ if st.session_state.page == "📈 ENOM KPI":
             yaxis_range=[70, 100],
             xaxis_title="Month",
             yaxis_title="Final KPI",
-            hovermode="closest"
+            hovermode="closest",
             title={
                 "text": f"Availability Chart<br><sup>Last updated: {last_updated}</sup>",
                 "x": 0.5,

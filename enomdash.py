@@ -33,7 +33,7 @@ with st.sidebar:
 # --- Load Data for ENOM KPI ---
 @st.cache_data
 def load_kpi_data():
-    df = pd.read_excel("C:/Ariya Data/python/enomdashboard/data/enom_kpi.xlsx", sheet_name="KPI")
+    df = pd.read_excel("data/enom_kpi.xlsx", sheet_name="KPI")
     
     # Parse Period_str into Month and Year
     df["Period_str"] = df["Period_str"].astype(str).str.strip()
@@ -49,9 +49,9 @@ def load_data_ava_monthly():
         df['Month'] = df['Month'].astype(str).str.strip().str[:3].str.title()
         return df
 
-    regional = pd.read_csv("C:/Ariya Data/python/enomdashboard/data/availability_regional.csv")
-    nop = pd.read_csv("C:/Ariya Data/python/enomdashboard/data/availability_nop.csv")
-    site = pd.read_csv("C:/Ariya Data/python/enomdashboard/data/availability_site.csv")
+    regional = pd.read_csv("data/availability_regional.csv")
+    nop = pd.read_csv("data/availability_nop.csv")
+    site = pd.read_csv("data/availability_site.csv")
 
     return clean_month(regional), clean_month(nop), clean_month(site)
 

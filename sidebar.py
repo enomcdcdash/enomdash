@@ -10,11 +10,10 @@ def navigation():
         """, unsafe_allow_html=True)
 
         # Logo
-        st.markdown("""
-            <div style="text-align: center; margin-bottom: 15px;">
-                <img src="https://portal.telkominfra.com/resources/img/telkominfra-logo-2.png" width="200">
-            </div>
-        """, unsafe_allow_html=True)
+        # Load logo from local assets
+        logo_path = Path("assets/logo.png")
+        if logo_path.exists():
+            st.image(str(logo_path), width=200)
 
         # Divider
         st.markdown("<hr style='margin-top: 0; margin-bottom: 15px;'>", unsafe_allow_html=True)

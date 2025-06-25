@@ -10,22 +10,24 @@ import streamlit as st
 import os
 
 def get_drive():
-    gauth = GoogleAuth()
+    # Convert the service account secret from st.secrets to dict
+    service_account_info = dict(st.secrets["google_service_account"])
 
-    # Extract secrets safely from st.secrets
-    service_info = st.secrets["google_service_account"]
+    # Write to a temporary local file
+    service_json_path = "service_secrets.json"
+    with open(service_json_path, "w") as f:
+        json.dump(service_account_info, f)
 
-    # Write it to a temporary JSON file
-    import json, os
-    with open("service_secrets.json", "w") as f:
-        json.dump(dict(service_info), f)  # <--- convert to regular dict first!
-
-    gauth.DEFAULT_SETTINGS['client_config_backend'] = 'service'
-    gauth.DEFAULT_SETTINGS['service_config'] = {
-        'client_json_file_path': 'service_secrets.json'
+    # Set default config BEFORE creating GoogleAuth()
+    GoogleAuth.DEFAULT_SETTINGS['client_config_backend'] = 'service'
+    GoogleAuth.DEFAULT_SETTINGS['service_config'] = {
+        'client_json_file_path': service_json_path
     }
 
+    # Now instantiate auth
+    gauth = GoogleAuth()
     gauth.ServiceAuth()
+
     return GoogleDrive(gauth)
 
 drive = get_drive()

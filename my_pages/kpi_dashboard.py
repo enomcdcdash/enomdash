@@ -74,7 +74,7 @@ def app_tab1():
                 background = get_color(score)
                 font_color = "black" if background.lower() in ["#2ecc71", "#ffffff"] else "white"
                 styles.append(
-                    f"background-color: {background}; color: {font_color}; font-weight: bold; font-size: 26px"
+                    f"background-color: {background}; color: {font_color}; font-weight: bold; font-size: 18px"
                 )
             else:
                 styles.append("")
@@ -97,6 +97,13 @@ def app_tab1():
             else:
                 styles.append("")
         return styles
+
+    alignment_style = {
+        "SON L1 Score": "text-align: center; vertical-align: middle",
+        "SON L1 Status": "text-align: center; vertical-align: middle",
+        "SOMSA L0 Score": "text-align: center; vertical-align: middle",
+        "SOMSA L0 Status": "text-align: center; vertical-align: middle",
+    }
 
     # --- KPI Summary for AREA 1 & 3 ---
     st.markdown("### 📊 SONL 1 Score Category Count (AREA 1 & AREA 3)")
@@ -151,14 +158,67 @@ def app_tab1():
         styled_df_visible = df_area1_visible.style \
             .format({"SON L1 Score": "{:.2f}", "SOMSA L0 Score": "{:.2f}"}) \
             .apply(highlight_sonl1_score, axis=1) \
-            .apply(highlight_status, axis=1)
+            .apply(highlight_status, axis=1) \
+            .set_properties(**alignment_style)
 
         #st.markdown(f"📅 Showing data for: **{month} {year}**")  # ← Add this line
-        st.dataframe(
-            styled_df_visible,
-            height=635,
-            use_container_width=True
-        )
+        #st.dataframe(
+        #    styled_df_visible,
+        #    height=635,
+        #    use_container_width=True
+        #)
+        #st.table(styled_df_visible)
+        # Convert styled DataFrame to HTML (keep conditional formatting)
+        import streamlit.components.v1 as components
+
+        # Convert styled DataFrame to HTML
+        table_html = styled_df_visible.to_html(escape=False)
+
+        # Get column positions for left-aligning REGIONAL and NOP
+        columns = styled_df_visible.columns.tolist()
+        left_align_cols = ["REGIONAL", "NOP"]
+        left_align_indexes = [f"col{i}" for i, col in enumerate(columns) if col in left_align_cols]
+
+        # Build CSS to apply left alignment to specific columns
+        left_align_css = ", ".join([f'td.{idx}' for idx in left_align_indexes])
+
+        # Final HTML with professional styles
+        html_code = f"""
+        <div style="overflow-x:auto; width:100%; padding: 10px;">
+            <style>
+                table {{
+                    width: 100% !important;
+                    table-layout: auto !important;
+                    border-collapse: collapse !important;
+                    font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+                    font-size: 14px !important;
+                    color: #333 !important;
+                    border: 1px solid #ccc;
+                }}
+                th, td {{
+                    padding: 5px !important;
+                    white-space: nowrap;
+                    text-align: center !important;
+                    vertical-align: middle !important;
+                    border: 1px solid #ccc;
+                }}
+                th {{
+                    background-color: #f2f2f2;
+                    font-weight: 600;
+                }}
+                {left_align_css} {{
+                    text-align: left !important;
+                }}
+                tr:nth-child(even) {{
+                    background-color: #fafafa;
+                }}
+            </style>
+            {table_html}
+        </div>
+        """
+
+        # Render in Streamlit
+        components.html(html_code, height=700, scrolling=True)
 
     # --- AREA 3 ---
     with col2:
@@ -189,14 +249,69 @@ def app_tab1():
         styled_df_visible_3 = df_area3_visible.style \
             .format({"SON L1 Score": "{:.2f}", "SOMSA L0 Score": "{:.2f}"}) \
             .apply(highlight_sonl1_score, axis=1) \
-            .apply(highlight_status, axis=1)
+            .apply(highlight_status, axis=1) \
+            .set_properties(**alignment_style)
 
         #st.markdown(f"📅 Showing data for: **{month} {year}**")  # ← Add this line
-        st.dataframe(
-            styled_df_visible_3,
-            height=635,
-            use_container_width=True
-        )
+        #st.dataframe(
+        #    styled_df_visible_3,
+        #    height=635,
+        #    use_container_width=True
+        #)
+        #st.table(styled_df_visible)
+        #st.markdown(styled_df_visible.to_html(escape=False), unsafe_allow_html=True)
+
+        # Convert styled DataFrame to HTML (keep conditional formatting)
+        import streamlit.components.v1 as components
+
+        # Convert styled DataFrame to HTML
+        table_html = styled_df_visible_3.to_html(escape=False)
+
+        # Get column positions for left-aligning REGIONAL and NOP
+        columns = styled_df_visible.columns.tolist()
+        left_align_cols = ["REGIONAL", "NOP"]
+        left_align_indexes = [f"col{i}" for i, col in enumerate(columns) if col in left_align_cols]
+
+        # Build CSS to apply left alignment to specific columns
+        left_align_css = ", ".join([f'td.{idx}' for idx in left_align_indexes])
+
+        # Final HTML with professional styles
+        html_code = f"""
+        <div style="overflow-x:auto; width:100%; padding: 10px;">
+            <style>
+                table {{
+                    width: 100% !important;
+                    table-layout: auto !important;
+                    border-collapse: collapse !important;
+                    font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+                    font-size: 14px !important;
+                    color: #333 !important;
+                    border: 1px solid #ccc;
+                }}
+                th, td {{
+                    padding: 5px !important;
+                    white-space: nowrap;
+                    text-align: center !important;
+                    vertical-align: middle !important;
+                    border: 1px solid #ccc;
+                }}
+                th {{
+                    background-color: #f2f2f2;
+                    font-weight: 600;
+                }}
+                {left_align_css} {{
+                    text-align: left !important;
+                }}
+                tr:nth-child(even) {{
+                    background-color: #fafafa;
+                }}
+            </style>
+            {table_html}
+        </div>
+        """
+
+        # Render in Streamlit
+        components.html(html_code, height=700, scrolling=True)
 
 import streamlit as st
 import pandas as pd
@@ -337,6 +452,7 @@ def app_tab2():
 
 # --- Unified app() with tabs ---
 def app():
+    st.title("📶 KPI Monitoring Dashboard")
     tab1, tab2 = st.tabs(["📌 Daily KPI Summary", "📈 Daily KPI Trend"])
     with tab1:
         app_tab1()

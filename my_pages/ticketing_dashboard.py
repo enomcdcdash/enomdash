@@ -409,7 +409,7 @@ def app_tab2():
 
 
 def app():
-    st.header("🛠️ Ticketing Dashboard")
+    st.title("🛠️ Ticketing Dashboard")
 
     tab1, tab2 = st.tabs(["📍 Incident", "📍 Event"])
     with tab1:

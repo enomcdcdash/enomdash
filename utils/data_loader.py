@@ -5,18 +5,21 @@ import io
 # --- Authenticate with Google Drive ---
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
+import json
 import os
 
 def get_drive():
     gauth = GoogleAuth()
+    gauth.DEFAULT_SETTINGS['client_config_backend'] = 'settings'
+    gauth.DEFAULT_SETTINGS['settings_file'] = None
 
-    # DIRECT method: just set backend and load the service account JSON file
-    gauth.DEFAULT_SETTINGS['client_config_backend'] = 'service'
-    gauth.DEFAULT_SETTINGS['service_config'] = {
-        'client_json_file_path': 'service_secrets.json'
-    }
+    # Write the secret to a temporary JSON file
+    with open("temp_service_account.json", "w") as f:
+        json.dump(st.secrets["google_service_account"], f)
 
+    gauth.LoadServiceConfigFile("temp_service_account.json")
     gauth.ServiceAuth()
+
     return GoogleDrive(gauth)
 
 drive = get_drive()

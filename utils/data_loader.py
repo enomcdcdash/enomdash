@@ -11,16 +11,21 @@ import os
 
 def get_drive():
     gauth = GoogleAuth()
-    gauth.DEFAULT_SETTINGS['client_config_backend'] = 'settings'
-    gauth.DEFAULT_SETTINGS['settings_file'] = None
 
-    # Write the secret to a temporary JSON file
-    with open("temp_service_account.json", "w") as f:
-        json.dump(st.secrets["google_service_account"], f)
+    # Extract secrets safely from st.secrets
+    service_info = st.secrets["google_service_account"]
 
-    gauth.LoadServiceConfigFile("temp_service_account.json")
+    # Write it to a temporary JSON file
+    import json, os
+    with open("service_secrets.json", "w") as f:
+        json.dump(dict(service_info), f)  # <--- convert to regular dict first!
+
+    gauth.DEFAULT_SETTINGS['client_config_backend'] = 'service'
+    gauth.DEFAULT_SETTINGS['service_config'] = {
+        'client_json_file_path': 'service_secrets.json'
+    }
+
     gauth.ServiceAuth()
-
     return GoogleDrive(gauth)
 
 drive = get_drive()

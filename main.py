@@ -1,9 +1,11 @@
 import streamlit as st
 from sidebar import navigation
 
+# ✅ Must be the first Streamlit command
+st.set_page_config(page_title="Dashboard ENOM 2.0", layout="wide")
+
 def main():
-    st.set_page_config(page_title="Dashboard ENOM 2.0", layout="wide")
-    st.title("📊 Dashboard ENOM 2.0")
+    st.title("Dashboard ENOM 2.0")
 
     selected_page = navigation()
 
@@ -16,6 +18,9 @@ def main():
     elif selected_page == "Availability":
         from my_pages import availability_dashboard
         availability_dashboard.app()
+    elif selected_page == "Daily":
+        from my_pages import daily_availability
+        daily_availability.app()
 
 if __name__ == "__main__":
     main()

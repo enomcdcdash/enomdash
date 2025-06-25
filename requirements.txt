@@ -1,7 +1,4 @@
 streamlit
 pandas
-seaborn
-matplotlib
 openpyxl
-plotly
-XlsxWriter
+pydrive2

@@ -718,8 +718,9 @@ def app_tab4():
                 legend=dict(x=1, y=1.2, xanchor="right", orientation="h")
             )
 
+            # ✅ FIXED: Add unique key
             col.plotly_chart(fig, use_container_width=True, key=f"tab4_operational_chart_{i}_{j}_{title.replace(' ', '_')}")
-
+            
 def app():
     # Create a row with the title on the left and button on the right
     col1, col2 = st.columns([10, 1])  # 6:1 ratio keeps the button narrow and aligned right

@@ -30,19 +30,16 @@ def add_takeover_visit_charts(df_d, df_m, st):
             df_d = df_d.sort_values("Date")
             df_m = df_m.sort_values("Date").copy()
 
-            # Clean percentage column if needed
             if df_m[mtd_col].dtype == 'object':
                 df_m[mtd_col] = df_m[mtd_col].str.replace('%', '').astype(float)
 
             fig = go.Figure()
 
-            # Bar chart: daily count (right Y-axis)
             fig.add_trace(go.Bar(
                 x=df_d["Date"],
                 y=df_d[daily_col],
                 name="Daily (count)",
                 yaxis="y2",
-                #marker_color="#FFAA00",  # orange
                 marker_color="#2FB1F2",
                 opacity=0.6,
                 text=df_d[daily_col],
@@ -50,8 +47,6 @@ def add_takeover_visit_charts(df_d, df_m, st):
                 insidetextanchor="start"
             ))
 
-
-            # Line chart: MTD (%) trend (left Y-axis)
             fig.add_trace(go.Scatter(
                 x=df_m["Date"],
                 y=df_m[mtd_col] * 100,
@@ -61,7 +56,6 @@ def add_takeover_visit_charts(df_d, df_m, st):
                 yaxis="y1"
             ))
 
-            # Target line (left Y-axis)
             fig.add_trace(go.Scatter(
                 x=df_m["Date"],
                 y=[target_val] * len(df_m),
@@ -74,23 +68,16 @@ def add_takeover_visit_charts(df_d, df_m, st):
             fig.update_layout(
                 title=f"{title} Performance",
                 xaxis=dict(title="Date"),
-                yaxis=dict(
-                    title="Percentage (%)",
-                    range=[0, 100],
-                    showgrid=False
-                ),
-                yaxis2=dict(
-                    title="Daily Count",
-                    overlaying='y',
-                    side='right',
-                    showgrid=False
-                ),
+                yaxis=dict(title="Percentage (%)", range=[0, 100], showgrid=False),
+                yaxis2=dict(title="Daily Count", overlaying='y', side='right', showgrid=False),
                 height=350,
                 margin=dict(t=30, b=30),
                 legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
             )
 
+            # ✅ Removed invalid `key` argument
             col.plotly_chart(fig, use_container_width=True)
+            
 
 def app_tab1():
     st.header("📌 Incident - MTTR P90 by Severity")
@@ -226,7 +213,7 @@ def app_tab1():
                 margin=dict(t=30, b=30),
                 hovermode="x unified",
             )
-
+            #col.plotly_chart(fig, use_container_width=True, key=f"{sev}_mttr_chart")
             col.plotly_chart(fig, use_container_width=True)
 
     #st.markdown("---")
@@ -330,6 +317,7 @@ def app_tab2():
                 legend=dict(x=1, y=1.2, xanchor="right", orientation="h")
             )
             col.plotly_chart(fig, use_container_width=True)
+            #col.plotly_chart(fig, use_container_width=True, key=f"mttr_tab2_{sev}")
 
     # Clean percentage columns in MTD
     percent_cols = ["EM-%TO-MTD", "EM-%TO-High-MTD", "EM-%TO-Low-MTD", "EM-%Visit-MTD"]
@@ -406,7 +394,7 @@ def app_tab2():
                 margin=dict(t=30, b=30),
                 legend=dict(x=1, y=1.2, xanchor="right", orientation="h")
             )
-
+            
             col.plotly_chart(fig, use_container_width=True)
 
 def app_tab3():
@@ -732,10 +720,10 @@ def app_tab4():
 
 def app():
     # Create a row with the title on the left and button on the right
-    col1, col2 = st.columns([6, 1])  # 6:1 ratio keeps the button narrow and aligned right
+    col1, col2 = st.columns([10, 1])  # 6:1 ratio keeps the button narrow and aligned right
 
     with col1:
-        st.markdown("### 🛠️ Ticketing Dashboard")
+        st.title("🛠️ Ticketing Dashboard")
 
     with col2:
         st.markdown("")  # Add spacing if needed

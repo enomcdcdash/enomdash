@@ -13,13 +13,12 @@ def get_drive():
     service_info = dict(st.secrets["google_service_account"])
 
     gauth = GoogleAuth()
-    gauth.service_account_info = service_info
-
-    # ✅ Use Authorize instead of ServiceAuth to avoid 'service_config' error
+    gauth.settings['get_refresh_token'] = True  # Optional but safe
+    gauth.credentials = gauth._GetServiceAccountCredentialsFromInfo(service_info)
     gauth.Authorize()
 
     return GoogleDrive(gauth)
-
+    
 drive = get_drive()
 FOLDER_ID = "16UY4IslY4KFTo5O1I6MBMzuPF9IQGwuE"  # <-- Replace this with your actual Drive folder ID
 

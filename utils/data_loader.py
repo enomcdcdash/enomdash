@@ -12,18 +12,12 @@ import os
 def get_drive():
     service_info = dict(st.secrets["google_service_account"])
 
-    # Save service account JSON to temp file
-    with tempfile.NamedTemporaryFile(mode="w+", suffix=".json", delete=False) as temp_file:
-        json.dump(service_info, temp_file)
-        temp_file.flush()  # make sure it's written
+    gauth = GoogleAuth()
+    gauth.auth_method = 'service'
 
-        gauth = GoogleAuth()
-        gauth.DEFAULT_SETTINGS['client_config_backend'] = 'service'
-        gauth.DEFAULT_SETTINGS['service_config'] = {
-            'client_json_file_path': temp_file.name
-        }
-
-        gauth.ServiceAuth()
+    # Directly pass the credentials JSON
+    gauth.service_account_info = service_info
+    gauth.ServiceAuth()
 
     return GoogleDrive(gauth)
 

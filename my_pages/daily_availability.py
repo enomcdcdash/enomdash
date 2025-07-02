@@ -358,8 +358,18 @@ def app_tab3():
 
 
 def app():
-    st.title("📈 Daily Availability Dashboard")
+    #st.title("📈 Daily Availability Dashboard")
+    col1, col2 = st.columns([9, 1]) 
 
+    with col1:
+        st.title("📈 Daily Availability Dashboard")
+
+    with col2:
+        st.markdown("")  # Add spacing if needed
+        if st.button("🔄 Refresh Data", help="Reload all ticketing data"):
+            st.cache_data.clear()
+            st.rerun()
+            
     tab1, tab2, tab3 = st.tabs([
         "📍 Regional Level",
         "🏢 NOP Level",

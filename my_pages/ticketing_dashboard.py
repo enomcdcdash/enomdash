@@ -18,65 +18,65 @@ def add_takeover_visit_charts(df_d, df_m, st):
     for i in range(0, len(chart_config), 2):
         col1, col2 = st.columns(2)
         for col, cfg in zip([col1, col2], chart_config[i:i+2]):
-            daily_col = cfg["daily"]
-            mtd_col = cfg["mtd"]
-            target_val = cfg["target"]
-            title = cfg["title"]
+            with col.container():  # <-- isolate this chart
+                daily_col = cfg["daily"]
+                mtd_col = cfg["mtd"]
+                target_val = cfg["target"]
+                title = cfg["title"]
 
-            if daily_col not in df_d.columns or mtd_col not in df_m.columns:
-                col.warning(f"Missing required columns for {title}")
-                continue
+                if daily_col not in df_d.columns or mtd_col not in df_m.columns:
+                    st.warning(f"Missing required columns for {title}")
+                    continue
 
-            df_d = df_d.sort_values("Date")
-            df_m = df_m.sort_values("Date").copy()
+                df_d = df_d.sort_values("Date")
+                df_m = df_m.sort_values("Date").copy()
 
-            if df_m[mtd_col].dtype == 'object':
-                df_m[mtd_col] = df_m[mtd_col].str.replace('%', '').astype(float)
+                if df_m[mtd_col].dtype == 'object':
+                    df_m[mtd_col] = df_m[mtd_col].str.replace('%', '').astype(float)
 
-            fig = go.Figure()
+                fig = go.Figure()
 
-            fig.add_trace(go.Bar(
-                x=df_d["Date"],
-                y=df_d[daily_col],
-                name="Daily (count)",
-                yaxis="y2",
-                marker_color="#2FB1F2",
-                opacity=0.6,
-                text=df_d[daily_col],
-                textposition="inside",
-                insidetextanchor="start"
-            ))
+                fig.add_trace(go.Bar(
+                    x=df_d["Date"],
+                    y=df_d[daily_col],
+                    name="Daily (count)",
+                    yaxis="y2",
+                    marker_color="#2FB1F2",
+                    opacity=0.6,
+                    text=df_d[daily_col],
+                    textposition="inside",
+                    insidetextanchor="start"
+                ))
 
-            fig.add_trace(go.Scatter(
-                x=df_m["Date"],
-                y=df_m[mtd_col] * 100,
-                mode="lines+markers",
-                name="MTD (%)",
-                line=dict(color="#2CA02C", width=3),
-                yaxis="y1"
-            ))
+                fig.add_trace(go.Scatter(
+                    x=df_m["Date"],
+                    y=df_m[mtd_col] * 100,
+                    mode="lines+markers",
+                    name="MTD (%)",
+                    line=dict(color="#2CA02C", width=3),
+                    yaxis="y1"
+                ))
 
-            fig.add_trace(go.Scatter(
-                x=df_m["Date"],
-                y=[target_val] * len(df_m),
-                mode="lines",
-                name="Target",
-                line=dict(color="#D62728", dash="dash"),
-                yaxis="y1"
-            ))
+                fig.add_trace(go.Scatter(
+                    x=df_m["Date"],
+                    y=[target_val] * len(df_m),
+                    mode="lines",
+                    name="Target",
+                    line=dict(color="#D62728", dash="dash"),
+                    yaxis="y1"
+                ))
 
-            fig.update_layout(
-                title=f"{title} Performance",
-                xaxis=dict(title="Date"),
-                yaxis=dict(title="Percentage (%)", range=[0, 100], showgrid=False),
-                yaxis2=dict(title="Daily Count", overlaying='y', side='right', showgrid=False),
-                height=350,
-                margin=dict(t=30, b=30),
-                legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
-            )
+                fig.update_layout(
+                    title=f"{title} Performance",
+                    xaxis=dict(title="Date"),
+                    yaxis=dict(title="Percentage (%)", range=[0, 100], showgrid=False),
+                    yaxis2=dict(title="Daily Count", overlaying='y', side='right', showgrid=False),
+                    height=350,
+                    margin=dict(t=30, b=30),
+                    legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
+                )
 
-            # ✅ Removed invalid `key` argument
-            col.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True)
             
 
 def app_tab1():

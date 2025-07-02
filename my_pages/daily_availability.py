@@ -21,10 +21,6 @@ def load_all_data():
 with st.spinner("🔄 Loading data..."):
     df_regional, df_nop = load_all_data()
 
-# --- Tab Functions ---
-import streamlit as st
-import plotly.express as px
-import pandas as pd
 
 def app_tab1():
     st.subheader("📍 Regional Level")

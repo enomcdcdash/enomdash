@@ -5,6 +5,7 @@ import tempfile
 # --- Authenticate with Google Drive ---
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
+from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
 import json
 import os

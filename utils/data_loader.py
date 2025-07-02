@@ -13,11 +13,10 @@ def get_drive():
     service_info = dict(st.secrets["google_service_account"])
 
     gauth = GoogleAuth()
-    gauth.auth_method = 'service'
-
-    # Directly pass the credentials JSON
     gauth.service_account_info = service_info
-    gauth.ServiceAuth()
+
+    # ✅ Use Authorize instead of ServiceAuth to avoid 'service_config' error
+    gauth.Authorize()
 
     return GoogleDrive(gauth)
 

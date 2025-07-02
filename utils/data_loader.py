@@ -10,15 +10,13 @@ import json
 import os
 
 def get_drive():
-    # Extract the service account info from Streamlit secrets
     service_info = dict(st.secrets["google_service_account"])
 
-    # Write credentials to a temporary JSON file
+    # Save service account JSON to temp file
     with tempfile.NamedTemporaryFile(mode="w+", suffix=".json", delete=False) as temp_file:
         json.dump(service_info, temp_file)
-        temp_file.flush()  # Make sure data is written
+        temp_file.flush()  # make sure it's written
 
-        # Configure PyDrive2 to use this service account file
         gauth = GoogleAuth()
         gauth.DEFAULT_SETTINGS['client_config_backend'] = 'service'
         gauth.DEFAULT_SETTINGS['service_config'] = {

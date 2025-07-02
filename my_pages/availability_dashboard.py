@@ -426,7 +426,17 @@ def app_tab4():
     st.plotly_chart(fig, use_container_width=True)
 
 def app():
-    st.title("📊 Monthly Availability Dashboard")
+    #st.title("📊 Monthly Availability Dashboard")
+    col1, col2 = st.columns([9, 1])  # 6:1 ratio keeps the button narrow and aligned right
+
+    with col1:
+        st.title("📊 Monthly Availability Dashboard")
+
+    with col2:
+        st.markdown("")  # Add spacing if needed
+        if st.button("🔄 Refresh Data", help="Reload all ticketing data"):
+            st.cache_data.clear()
+            st.rerun()
 
     tab1, tab2, tab3, tab4 = st.tabs(["Regional Level", "NOP Level", "Site Level", "Availability Summary"])
 

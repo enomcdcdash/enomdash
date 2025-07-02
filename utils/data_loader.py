@@ -11,10 +11,12 @@ import os
 
 def get_drive():
     service_info = dict(st.secrets["google_service_account"])
+    
+    scopes = ['https://www.googleapis.com/auth/drive']
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(service_info, scopes)
 
     gauth = GoogleAuth()
-    gauth.settings['get_refresh_token'] = True  # Optional but safe
-    gauth.credentials = gauth._GetServiceAccountCredentialsFromInfo(service_info)
+    gauth.credentials = credentials
     gauth.Authorize()
 
     return GoogleDrive(gauth)

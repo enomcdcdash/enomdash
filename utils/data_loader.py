@@ -10,22 +10,15 @@ import json
 import os
 
 def get_drive():
+    service_info = dict(st.secrets["google_service_account"])
+
     gauth = GoogleAuth()
+    gauth.auth_method = 'service'
 
-    # Extract secrets safely from st.secrets
-    service_info = st.secrets["google_service_account"]
-
-    # Write it to a temporary JSON file
-    import json, os
-    with open("service_secrets.json", "w") as f:
-        json.dump(dict(service_info), f)  # <--- convert to regular dict first!
-
-    gauth.DEFAULT_SETTINGS['client_config_backend'] = 'service'
-    gauth.DEFAULT_SETTINGS['service_config'] = {
-        'client_json_file_path': 'service_secrets.json'
-    }
-
+    # Directly pass the credentials JSON
+    gauth.service_account_info = service_info
     gauth.ServiceAuth()
+
     return GoogleDrive(gauth)
 
 drive = get_drive()

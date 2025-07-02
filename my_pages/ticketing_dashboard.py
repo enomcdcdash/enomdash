@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 from utils.data_loader import load_ticketing_data
 
 # 2. Add takeover/visit charts function FIRST
-def add_takeover_visit_charts(df_d, df_m, st):
+def add_takeover_visit_charts(df_d, df_m, st, prefix=""):
     chart_config = [
         {"title": "Takeover", "daily": "IM-TO-Daily", "mtd": "IM-%TO-MTD", "target": 80},
         {"title": "Takeover High", "daily": "IM-TO-High-Daily", "mtd": "IM-%TO-High-MTD", "target": 80},
@@ -17,8 +17,8 @@ def add_takeover_visit_charts(df_d, df_m, st):
 
     for i in range(0, len(chart_config), 2):
         col1, col2 = st.columns(2)
-        for col, cfg in zip([col1, col2], chart_config[i:i+2]):
-            with col.container():  # <-- isolate this chart
+        for j, (col, cfg) in enumerate(zip([col1, col2], chart_config[i:i+2])):
+            with col.container():
                 daily_col = cfg["daily"]
                 mtd_col = cfg["mtd"]
                 target_val = cfg["target"]
@@ -76,7 +76,9 @@ def add_takeover_visit_charts(df_d, df_m, st):
                     legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
                 )
 
-                st.plotly_chart(fig, use_container_width=True)
+                # ✅ Now add a UNIQUE key to avoid collisions
+                chart_key = f"{prefix}_chart_{i}_{j}_{title.replace(' ', '_')}"
+                st.plotly_chart(fig, use_container_width=True, key=chart_key)
             
 
 def app_tab1():
@@ -219,7 +221,7 @@ def app_tab1():
     #st.markdown("---")
     #st.subheader("📌 Additional Ticketing KPIs")
 
-    add_takeover_visit_charts(df_d, df_m, st)
+    add_takeover_visit_charts(df_d, df_m, st, prefix="incident")
 
 
 def app_tab2():
@@ -532,7 +534,7 @@ def app_tab3():
             col.plotly_chart(fig, use_container_width=True)
 
     # Add additional takeover/visit charts if needed for cluster
-    add_takeover_visit_charts(df_d, df_m, st)
+    add_takeover_visit_charts(df_d, df_m, st, prefix="cluster")
 
 def app_tab4():
     st.header("📈 Event Cluster - MTTR P90 & Operational Performance")

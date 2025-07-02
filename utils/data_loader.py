@@ -5,29 +5,27 @@ import io
 # --- Authenticate with Google Drive ---
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
-import json
 import streamlit as st
+import json
 import os
 
 def get_drive():
-    # Convert the service account secret from st.secrets to dict
-    service_account_info = dict(st.secrets["google_service_account"])
+    gauth = GoogleAuth()
 
-    # Write to a temporary local file
-    service_json_path = "service_secrets.json"
-    with open(service_json_path, "w") as f:
-        json.dump(service_account_info, f)
+    # Extract secrets safely from st.secrets
+    service_info = st.secrets["google_service_account"]
 
-    # Set default config BEFORE creating GoogleAuth()
-    GoogleAuth.DEFAULT_SETTINGS['client_config_backend'] = 'service'
-    GoogleAuth.DEFAULT_SETTINGS['service_config'] = {
-        'client_json_file_path': service_json_path
+    # Write it to a temporary JSON file
+    import json, os
+    with open("service_secrets.json", "w") as f:
+        json.dump(dict(service_info), f)  # <--- convert to regular dict first!
+
+    gauth.DEFAULT_SETTINGS['client_config_backend'] = 'service'
+    gauth.DEFAULT_SETTINGS['service_config'] = {
+        'client_json_file_path': 'service_secrets.json'
     }
 
-    # Now instantiate auth
-    gauth = GoogleAuth()
     gauth.ServiceAuth()
-
     return GoogleDrive(gauth)
 
 drive = get_drive()
@@ -59,9 +57,11 @@ def load_drive_csvs_by_prefix(prefix):
 
 
 # Wrapper functions
+@st.cache_data(ttl=3600)
 def load_daily_availability_regional(): return load_drive_csvs_by_prefix("daily_regional")
+@st.cache_data(ttl=3600)
 def load_daily_availability_nop(): return load_drive_csvs_by_prefix("daily_nop")
-
+@st.cache_data(ttl=3600)
 def load_kpi_data(sheet_name="KPI_Data"):
     try:
         file_list = drive.ListFile({'q': f"'{FOLDER_ID}' in parents and trashed=false"}).GetList()
@@ -84,9 +84,12 @@ def load_kpi_data(sheet_name="KPI_Data"):
 
 
 # --- Load Ticketing Data from Google Drive ---
+@st.cache_data(ttl=3600)
 def load_ticketing_data():
     daily_frames = []
     mtd_frames = []
+    daily_cluster_frames = []
+    mtd_cluster_frames = []
 
     file_list = drive.ListFile({'q': f"'{FOLDER_ID}' in parents and trashed=false"}).GetList()
     ticketing_files = [f for f in file_list if f['title'].startswith("ticketing") and f['title'].endswith(".xlsx")]
@@ -96,34 +99,51 @@ def load_ticketing_data():
             filename = file['title']
             file.GetContentFile(filename)
 
-            daily_df = pd.read_excel(filename, sheet_name="Daily", engine="openpyxl")
-            mtd_df = pd.read_excel(filename, sheet_name="MTD", engine="openpyxl")
+            # Read all relevant sheets at once
+            all_sheets = pd.read_excel(filename,
+                                       sheet_name=["Daily", "MTD", "Daily_Cluster", "MTD_Cluster"],
+                                       engine="openpyxl")
 
-            for df in [daily_df, mtd_df]:
-                df["Date"] = pd.to_datetime(df["Date"])
-                df["Month"] = df["Date"].dt.strftime("%B")
-                df["Year"] = df["Date"].dt.year
+            daily_df = all_sheets.get("Daily", pd.DataFrame())
+            mtd_df = all_sheets.get("MTD", pd.DataFrame())
+            daily_cluster_df = all_sheets.get("Daily_Cluster", pd.DataFrame())
+            mtd_cluster_df = all_sheets.get("MTD_Cluster", pd.DataFrame())
 
-            daily_frames.append(daily_df)
-            mtd_frames.append(mtd_df)
+            for df in [daily_df, mtd_df, daily_cluster_df, mtd_cluster_df]:
+                if not df.empty and "Date" in df.columns:
+                    df["Date"] = pd.to_datetime(df["Date"], errors='coerce')
+                    df["Month"] = df["Date"].dt.strftime("%B")
+                    df["Year"] = df["Date"].dt.year
 
-            os.remove(filename)  # Clean up local file
+            if not daily_df.empty:
+                daily_frames.append(daily_df)
+            if not mtd_df.empty:
+                mtd_frames.append(mtd_df)
+            if not daily_cluster_df.empty:
+                daily_cluster_frames.append(daily_cluster_df)
+            if not mtd_cluster_df.empty:
+                mtd_cluster_frames.append(mtd_cluster_df)
+
+            os.remove(filename)
 
         except Exception as e:
-            print(f"[ERROR] Failed to read {file['title']}: {e}")
+            print(f"[ERROR] Failed to load {file['title']}: {e}")
 
     df_daily = pd.concat(daily_frames, ignore_index=True) if daily_frames else pd.DataFrame()
     df_mtd = pd.concat(mtd_frames, ignore_index=True) if mtd_frames else pd.DataFrame()
+    df_daily_cluster = pd.concat(daily_cluster_frames, ignore_index=True) if daily_cluster_frames else pd.DataFrame()
+    df_mtd_cluster = pd.concat(mtd_cluster_frames, ignore_index=True) if mtd_cluster_frames else pd.DataFrame()
 
-    return df_daily, df_mtd
+    return df_daily, df_mtd, df_daily_cluster, df_mtd_cluster
 
 
 # --- Load Availability Data from Google Drive ---
+@st.cache_data(ttl=3600)
 def load_availability_regional_data():
     return load_drive_csvs_by_prefix("monthly_regional")
-
+@st.cache_data(ttl=3600)
 def load_availability_nop_data():
     return load_drive_csvs_by_prefix("monthly_nop")
-
+@st.cache_data(ttl=3600)
 def load_availability_site_data():
     return load_drive_csvs_by_prefix("monthly_site")

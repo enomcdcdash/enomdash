@@ -452,7 +452,18 @@ def app_tab2():
 
 # --- Unified app() with tabs ---
 def app():
-    st.title("📶 KPI Monitoring Dashboard")
+    #st.title("📶 KPI Monitoring Dashboard")
+    col1, col2 = st.columns([9, 1])  # 6:1 ratio keeps the button narrow and aligned right
+
+    with col1:
+        st.title("📶 KPI Monitoring Dashboard")
+
+    with col2:
+        st.markdown("")  # Add spacing if needed
+        if st.button("🔄 Refresh Data", help="Reload all ticketing data"):
+            st.cache_data.clear()
+            st.rerun()
+            
     tab1, tab2 = st.tabs(["📌 Daily KPI Summary", "📈 Daily KPI Trend"])
     with tab1:
         app_tab1()

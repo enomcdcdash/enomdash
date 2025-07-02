@@ -643,7 +643,7 @@ def app_tab4():
                 margin=dict(t=30, b=30),
                 legend=dict(x=1, y=1.2, xanchor="right", orientation="h")
             )
-            col.plotly_chart(fig, use_container_width=True)
+            col.plotly_chart(fig, use_container_width=True, key=f"tab4_severity_chart_{i}_{sev}")
 
     # Clean percentage columns
     percent_cols = ["EM-%TO-MTD", "EM-%TO-High-MTD", "EM-%TO-Low-MTD", "EM-%Visit-MTD"]
@@ -662,7 +662,7 @@ def app_tab4():
 
     for i in range(0, len(chart_specs), 2):
         col1, col2 = st.columns(2)
-        for col, (title, daily_col, mtd_col, target_val) in zip([col1, col2], chart_specs[i:i+2]):
+        for j, (col, (title, daily_col, mtd_col, target_val)) in enumerate(zip([col1, col2], chart_specs[i:i+2])):
             if daily_col not in df_d.columns or mtd_col not in df_m.columns:
                 col.warning(f"Missing columns for {title}")
                 continue
@@ -718,7 +718,7 @@ def app_tab4():
                 legend=dict(x=1, y=1.2, xanchor="right", orientation="h")
             )
 
-            col.plotly_chart(fig, use_container_width=True)
+            col.plotly_chart(fig, use_container_width=True, key=f"tab4_operational_chart_{i}_{j}_{title.replace(' ', '_')}")
 
 def app():
     # Create a row with the title on the left and button on the right

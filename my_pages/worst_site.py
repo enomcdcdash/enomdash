@@ -316,21 +316,113 @@ def app_tab2():
     st.plotly_chart(fig, use_container_width=True)
 
 def app_tab3():
-    st.subheader("📊 Regional Red Zone Distribution")
+    st.subheader("📊 Availability Summary by Site Class")
+
     df = load_worst_site_data()
 
-    if df.empty or "Regional" not in df.columns:
-        st.warning("Data not available or missing 'Regional' column.")
+    if df.empty or "Class S1 2025" not in df.columns:
+        st.warning("Data not available or missing 'Class S1 2025' column.")
         return
 
-    regional_summary = (
-        df.groupby("Regional")["Site ID"]
-        .nunique()
-        .reset_index(name="Total Red Zone Sites")
-        .sort_values("Total Red Zone Sites", ascending=False)
-    )
-    st.bar_chart(regional_summary.set_index("Regional"), use_container_width=True)
+    df.columns = df.columns.str.strip()
 
+    # Filter AREA1 and AREA3 only
+    df = df[df["Area"].isin(["AREA1", "AREA3"])]
+
+    # --- Select relevant columns ---
+    meta_cols = ["Class S1 2025", "Site ID", "Area", "Regional", "NOP"]
+    avail_cols = [col for col in df.columns if col.startswith("Avail W")]
+
+    if not all(col in df.columns for col in meta_cols + avail_cols):
+        st.warning("Missing required columns.")
+        return
+
+    df = df[meta_cols + avail_cols].dropna(subset=["Class S1 2025", "Site ID"])
+
+    # --- Filters ---
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        area_options = ["All"] + sorted(df["Area"].dropna().unique())
+        area_selected = st.selectbox("Select Area", area_options, key="area3")
+
+    with col2:
+        if area_selected == "All":
+            regional_options = ["All"] + sorted(df["Regional"].dropna().unique())
+        else:
+            regional_options = ["All"] + sorted(df[df["Area"] == area_selected]["Regional"].dropna().unique())
+        regional_selected = st.selectbox("Select Regional", regional_options, key="regional3")
+
+    with col3:
+        filtered_nop = df.copy()
+        if area_selected != "All":
+            filtered_nop = filtered_nop[filtered_nop["Area"] == area_selected]
+        if regional_selected != "All":
+            filtered_nop = filtered_nop[filtered_nop["Regional"] == regional_selected]
+        nop_options = ["All"] + sorted(filtered_nop["NOP"].dropna().unique())
+        nop_selected = st.selectbox("Select NOP", nop_options, key="nop3")
+
+    # Apply filters
+    filtered_df = df.copy()
+    if area_selected != "All":
+        filtered_df = filtered_df[filtered_df["Area"] == area_selected]
+    if regional_selected != "All":
+        filtered_df = filtered_df[filtered_df["Regional"] == regional_selected]
+    if nop_selected != "All":
+        filtered_df = filtered_df[filtered_df["NOP"] == nop_selected]
+
+    if filtered_df.empty:
+        st.warning("No data matching selected filters.")
+        return
+
+    # --- Melt to long format ---
+    df_long = filtered_df.melt(
+        id_vars=["Class S1 2025", "Area", "Site ID"],
+        value_vars=avail_cols,
+        var_name="Week",
+        value_name="Availability"
+    )
+    df_long["Week"] = df_long["Week"].str.replace("Avail ", "", regex=False)
+    df_long = df_long.dropna(subset=["Availability"])
+
+    # --- Group and summarize ---
+    summary = (
+        df_long.groupby(["Class S1 2025", "Week"])
+        .agg({"Availability": "mean"})
+        .reset_index()
+    )
+
+    # Create a new figure manually for full control
+    fig = go.Figure()
+
+    for site_class in summary["Class S1 2025"].unique():
+        class_df = summary[summary["Class S1 2025"] == site_class].sort_values("Week")
+
+        fig.add_trace(go.Scatter(
+            x=class_df["Week"],
+            y=class_df["Availability"],
+            mode="lines+markers+text",
+            name=site_class,
+            line=dict(width=4),
+            text=class_df["Availability"].round(2).astype(str),
+            textposition="bottom center",
+            textfont=dict(
+                size=14,        # ← font size
+                family="Arial", # ← Font family
+                color=None      # ← Match line color automatically
+            ),
+            marker=dict(size=8)
+        ))
+
+    fig.update_layout(
+        title="Average Availability by Site Class",
+        xaxis_title="Week",
+        yaxis_title="Availability (%)",
+        legend_title="Site Class",
+        height=550
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 def app():
     col1, col2 = st.columns([9, 1])
@@ -346,7 +438,7 @@ def app():
     tab1, tab2, tab3 = st.tabs([
         "📌 Red Zone Summary",
         "📈 Site Tracking",
-        "📊 Regional Breakdown"
+        "📊 Ava per Site Class"
     ])
 
     with tab1:

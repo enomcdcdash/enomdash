@@ -9,30 +9,60 @@ def app_tab1():
     st.subheader("🧁 Worst Site Distribution")
 
     df = load_worst_site_data()
-
     if df.empty:
         st.warning("No data available.")
         return
 
-    # Clean and filter
     df.columns = df.columns.str.strip()
     df = df.dropna(subset=["Site ID"])
+
+    # ✅ Filter only AREA1 and AREA3
     df = df[df["Area"].isin(["AREA1", "AREA3"])]
 
     if df.empty:
         st.info("No data available for AREA1 and AREA3.")
         return
 
+    # --- Add filters ---
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        area_options = ["All"] + sorted(df["Area"].dropna().unique())
+        area_selected = st.selectbox("Select Area", area_options, key="filter_area")
+
+    with col2:
+        filtered_df = df if area_selected == "All" else df[df["Area"] == area_selected]
+        regional_options = ["All"] + sorted(filtered_df["Regional"].dropna().unique())
+        regional_selected = st.selectbox("Select Regional", regional_options, key="filter_regional")
+
+    with col3:
+        filtered_df = filtered_df if regional_selected == "All" else filtered_df[filtered_df["Regional"] == regional_selected]
+        nop_options = ["All"] + sorted(filtered_df["NOP"].dropna().unique())
+        nop_selected = st.selectbox("Select NOP", nop_options, key="filter_nop")
+
+    # --- Apply filters ---
+    if area_selected != "All":
+        df = df[df["Area"] == area_selected]
+    if regional_selected != "All":
+        df = df[df["Regional"] == regional_selected]
+    if nop_selected != "All":
+        df = df[df["NOP"] == nop_selected]
+
+    if df.empty:
+        st.info("No data available for the selected filters.")
+        return
+
+    # --- Show total site count ---
     total_sites = df["Site ID"].nunique()
     st.markdown(f"""
         <div style="font-size: 22px; font-weight: bold; color: #2F5597;">
-            Total Sites (AREA1 & AREA3): {total_sites:,}
+            Total Sites: {total_sites:,}
         </div>
     """, unsafe_allow_html=True)
 
+    # --- Pie Charts ---
     col1, col2, col3 = st.columns(3)
 
-    # Pie 1: Site Count by Regional
     with col1:
         if "Regional" in df.columns:
             summary = df.groupby("Regional")["Site ID"].nunique().reset_index(name="Site Count")
@@ -40,7 +70,6 @@ def app_tab1():
             fig.update_traces(textinfo="label+percent+value")
             st.plotly_chart(fig, use_container_width=True)
 
-    # Pie 2: Site Count by Class S1 2025
     with col2:
         if "Class S1 2025" in df.columns:
             summary = df.groupby("Class S1 2025")["Site ID"].nunique().reset_index(name="Site Count")
@@ -48,66 +77,52 @@ def app_tab1():
             fig.update_traces(textinfo="label+percent+value")
             st.plotly_chart(fig, use_container_width=True)
 
-    # Pie 3: Site Count by Prio
     with col3:
         if "Prio" in df.columns:
             summary = df.groupby("Prio")["Site ID"].nunique().reset_index(name="Site Count")
             fig = px.pie(summary, names="Prio", values="Site Count", title="Breakdown By Priority", hole=0.3)
             fig.update_traces(textinfo="label+percent+value")
             st.plotly_chart(fig, use_container_width=True)
-    
-    # --- Stacked Bar Chart for Weekly Open/Closed/Reopen Status ---
+
+    # --- Stacked Bar Chart ---
     st.markdown("---")
     st.markdown("### 📊 Weekly Site Status (Open vs Closed vs Reopen)")
 
-    # --- Select Akumulasi Wxx columns ---
     akumulasi_columns = [col for col in df.columns if col.startswith("Akumulasi W")]
     df_status = df[["Site ID"] + akumulasi_columns].copy()
 
-    # --- Melt Akumulasi columns to long format ---
     status_long = df_status.melt(
         id_vars="Site ID",
         var_name="Week",
         value_name="Status"
-    )
+    ).dropna(subset=["Status"])
 
-    status_long = status_long.dropna(subset=["Status"])
-
-    # --- Clean Week labels (remove "Akumulasi ")
     status_long["Week"] = status_long["Week"].str.replace("Akumulasi ", "", regex=False)
-
-    # --- Ensure only valid status values are used ---
     valid_statuses = ["Open", "Closed", "Reopen"]
     status_long = status_long[status_long["Status"].isin(valid_statuses)]
 
-    # --- Count per status per week ---
     status_counts = (
         status_long.groupby(["Week", "Status"])["Site ID"]
         .count()
         .reset_index(name="Count")
     )
 
-    # --- Plot stacked bar chart ---
     fig = px.bar(
         status_counts,
         x="Week",
         y="Count",
         color="Status",
-        title="Open vs Closed vs Reopen Sites by Week (AREA1 & AREA3)",
+        title="Open vs Closed vs Reopen Sites by Week",
         barmode="stack",
         text_auto=True,
         color_discrete_map={
-            "Open": "#d62728",    # red
-            "Closed": "#2ca02c",  # green
-            "Reopen": "#1f77b4"   # blue
+            "Open": "#d62728",
+            "Closed": "#2ca02c",
+            "Reopen": "#1f77b4"
         }
     )
-
-    # --- Improve style ---
     fig.update_traces(opacity=0.7)
-    fig.update_traces(
-        textfont=dict(size=14, family="Arial", color="white")
-    )
+    fig.update_traces(textfont=dict(size=14, family="Arial", color="white"))
     fig.update_layout(
         yaxis_title="Site Count",
         xaxis_title="Week",

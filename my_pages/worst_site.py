@@ -250,20 +250,24 @@ def app_tab2():
 
     # --- Chart rendering ---
     if site_count == 1:
+        site = unique_sites[0]
         site_df = filtered_df[filtered_df["Site ID"] == site].sort_values("Week")
 
         fig = go.Figure()
 
-        # Green availability line
+        # Green availability line with labels
         fig.add_trace(go.Scatter(
             x=site_df["Week"],
             y=site_df["Availability"],
-            mode="lines+markers",
+            mode="lines+markers+text",  # ✅ Needed for labels
             name=f"{site}",
-            line=dict(color="green", width=4)
+            line=dict(color="green", width=4),
+            text=site_df["Availability"].round(2).astype(str) + "%",
+            textposition="bottom center",
+            textfont=dict(color="green", size=14, family="Arial Black")
         ))
 
-        # Blue target line
+        # Blue dashed target line
         fig.add_trace(go.Scatter(
             x=site_df["Week"],
             y=site_df["Target Line"],

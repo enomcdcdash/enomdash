@@ -67,21 +67,30 @@ def app_tab1():
         if "Regional" in df.columns:
             summary = df.groupby("Regional")["Site ID"].nunique().reset_index(name="Site Count")
             fig = px.pie(summary, names="Regional", values="Site Count", title="Breakdown By Regional", hole=0.3)
-            fig.update_traces(textinfo="label+percent+value")
+            fig.update_traces(
+                textinfo="label+percent+value",
+                textfont=dict(size=14, family="Arial")  # Increase font size
+            )
             st.plotly_chart(fig, use_container_width=True)
 
     with col2:
         if "Class S1 2025" in df.columns:
             summary = df.groupby("Class S1 2025")["Site ID"].nunique().reset_index(name="Site Count")
             fig = px.pie(summary, names="Class S1 2025", values="Site Count", title="Breakdown By Site Class", hole=0.3)
-            fig.update_traces(textinfo="label+percent+value")
+            fig.update_traces(
+                textinfo="label+percent+value",
+                textfont=dict(size=14, family="Arial")  # Increase font size
+            )
             st.plotly_chart(fig, use_container_width=True)
 
     with col3:
         if "Prio" in df.columns:
             summary = df.groupby("Prio")["Site ID"].nunique().reset_index(name="Site Count")
             fig = px.pie(summary, names="Prio", values="Site Count", title="Breakdown By Priority", hole=0.3)
-            fig.update_traces(textinfo="label+percent+value")
+            fig.update_traces(
+                textinfo="label+percent+value",
+                textfont=dict(size=14, family="Arial")  # Increase font size
+            )
             st.plotly_chart(fig, use_container_width=True)
 
     # --- Stacked Bar Chart ---
@@ -107,23 +116,59 @@ def app_tab1():
         .reset_index(name="Count")
     )
 
-    fig = px.bar(
-        status_counts,
-        x="Week",
-        y="Count",
-        color="Status",
-        title="Open vs Closed vs Reopen Sites by Week",
-        barmode="stack",
-        text_auto=True,
-        color_discrete_map={
-            "Open": "#d62728",
-            "Closed": "#2ca02c",
-            "Reopen": "#1f77b4"
-        }
-    )
-    fig.update_traces(opacity=0.7)
-    fig.update_traces(textfont=dict(size=14, family="Arial", color="white"))
+    # Determine the dynamic threshold
+    max_count = status_counts["Count"].max()
+    threshold = max_count * 0.1  # 10% of max height
+
+    fig = go.Figure()
+
+    status_colors = {
+        "Open": "#d62728",
+        "Closed": "#2ca02c",
+        "Reopen": "#1f77b4"
+    }
+
+    for status in status_counts["Status"].unique():
+        status_data = status_counts[status_counts["Status"] == status]
+
+        # Dynamically decide text position and color
+        text_positions = [
+            "inside" if count >= threshold else "outside" for count in status_data["Count"]
+        ]
+        text_colors = [
+            "white" if count >= threshold else "black" for count in status_data["Count"]
+        ]
+
+        fig.add_trace(go.Bar(
+            x=status_data["Week"],
+            y=status_data["Count"],
+            name=status,
+            marker_color=status_colors.get(status, "#888"),
+            text=status_data["Count"],
+            textposition=text_positions,
+            textfont=dict(size=18, family="Arial"),
+            insidetextfont=dict(color="white", size=18, family="Arial"),
+            outsidetextfont=dict(color="black", size=18, family="Arial"),
+            opacity=0.7,
+            cliponaxis=False
+        ))
+
+    # Assemble title parts
+    area_text = f"Area: {area_selected}" if area_selected != "All" else "All Areas"
+    regional_text = f" | Regional: {regional_selected}" if regional_selected != "All" else ""
+    nop_text = f" | NOP: {nop_selected}" if nop_selected != "All" else ""
+
+    # Final title text
+    full_title = f"<b><span style='color:#2F5597; font-size:20px;'>Open vs Closed vs Reopen Sites by Week ({area_text}{regional_text}{nop_text})</span></b>"
+
+    # Apply to chart
     fig.update_layout(
+        title={
+            "text": full_title,
+            "x": 0,
+            "xanchor": "left"
+        },
+        barmode="stack",
         yaxis_title="Site Count",
         xaxis_title="Week",
         legend_title="Status",

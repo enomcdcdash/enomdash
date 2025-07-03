@@ -21,6 +21,9 @@ def main():
     elif selected_page == "Daily":
         from my_pages import daily_availability
         daily_availability.app()
+    elif selected_page == "Worst Site":
+        from my_pages import worst_site
+        worst_site.app()
 
 if __name__ == "__main__":
     main()

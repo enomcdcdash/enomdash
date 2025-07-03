@@ -49,5 +49,7 @@ def navigation():
             st.session_state.selected_page = "Availability"
         if st.button("📅 Daily Availability", use_container_width=True):
             st.session_state.selected_page = "Daily"
+        if st.button("📉 Worst Site Dashboard", use_container_width=True):
+            st.session_state.selected_page = "Worst Site"
 
     return st.session_state.selected_page

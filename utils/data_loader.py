@@ -141,3 +141,24 @@ def load_availability_nop_data():
 @st.cache_data(ttl=3600)
 def load_availability_site_data():
     return load_drive_csvs_by_prefix("monthly_site")
+
+@st.cache_data(ttl=3600)
+def load_worst_site_data():
+    try:
+        file_list = drive.ListFile({'q': f"'{FOLDER_ID}' in parents and trashed=false"}).GetList()
+        target_file = next((f for f in file_list if f['title'].lower() == 'worst_site.xlsx'), None)
+
+        if not target_file:
+            print("[ERROR] worst_site.xlsx not found in Drive folder.")
+            return pd.DataFrame()
+
+        filename = "worst_site.xlsx"
+        target_file.GetContentFile(filename)
+
+        df = pd.read_excel(filename, sheet_name="Tracking Red Zone", engine="openpyxl", header=1)
+        os.remove(filename)
+        return df
+
+    except Exception as e:
+        print(f"[ERROR] Failed to load worst site data from Drive: {e}")
+        return pd.DataFrame()

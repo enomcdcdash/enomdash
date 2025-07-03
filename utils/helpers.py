@@ -1,3 +1,5 @@
+import pandas as pd
+
 # --- helpers.py ---
 def summarize_availability_nop(df):
     df_summary = (
@@ -86,3 +88,23 @@ def summarize_achievement_overall(df):
         )
     )
     return df_summary
+
+def clean_worst_site_data(df):
+    if df.empty:
+        return df
+
+    df.columns = df.columns.str.strip()  # Optional, just in case
+    df = df.dropna(subset=["Site ID"])
+    return df
+
+def get_pie_chart_data(df, group_by_col):
+    if df.empty or group_by_col not in df.columns:
+        return pd.DataFrame()
+
+    summary = (
+        df.groupby(group_by_col)["Site ID"]
+        .nunique()
+        .reset_index(name="Site Count")
+        .sort_values("Site Count", ascending=False)
+    )
+    return summary

@@ -69,7 +69,7 @@ def app_tab1():
             fig = px.pie(summary, names="Regional", values="Site Count", title="Breakdown By Regional", hole=0.3)
             fig.update_traces(
                 textinfo="label+percent+value",
-                textfont=dict(size=14, family="Arial Black")  # Increase font size
+                textfont=dict(size=14, family="Segoe UI Semibold")  # Increase font size
             )
             st.plotly_chart(fig, use_container_width=True)
 
@@ -79,7 +79,7 @@ def app_tab1():
             fig = px.pie(summary, names="Class S1 2025", values="Site Count", title="Breakdown By Site Class", hole=0.3)
             fig.update_traces(
                 textinfo="label+percent+value",
-                textfont=dict(size=14, family="Arial Black")  # Increase font size
+                textfont=dict(size=14, family="Segoe UI Semibold")  # Increase font size
             )
             st.plotly_chart(fig, use_container_width=True)
 
@@ -89,7 +89,7 @@ def app_tab1():
             fig = px.pie(summary, names="Prio", values="Site Count", title="Breakdown By Priority", hole=0.3)
             fig.update_traces(
                 textinfo="label+percent+value",
-                textfont=dict(size=14, family="Arial Black")  # Increase font size
+                textfont=dict(size=14, family="Segoe UI Semibold")  # Increase font size
             )
             st.plotly_chart(fig, use_container_width=True)
 

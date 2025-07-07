@@ -531,7 +531,9 @@ def app_tab3():
                 hovermode="x unified",
             )
 
-            col.plotly_chart(fig, use_container_width=True)
+            #col.plotly_chart(fig, use_container_width=True)
+            col.plotly_chart(fig, use_container_width=True, key=f"chart_{sev}")
+            
 
     # Add additional takeover/visit charts if needed for cluster
     add_takeover_visit_charts(df_d, df_m, st, prefix="cluster")

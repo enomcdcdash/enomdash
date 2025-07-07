@@ -1,18 +1,14 @@
+import streamlit as st
 import pandas as pd
-import glob
 import io
-import tempfile
-# --- Authenticate with Google Drive ---
+import os
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from oauth2client.service_account import ServiceAccountCredentials
-import streamlit as st
-import json
-import os
 
+# --- Authenticate with Google Drive ---
 def get_drive():
     service_info = dict(st.secrets["google_service_account"])
-    
     scopes = ['https://www.googleapis.com/auth/drive']
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(service_info, scopes)
 
@@ -21,11 +17,13 @@ def get_drive():
     gauth.Authorize()
 
     return GoogleDrive(gauth)
-    
-drive = get_drive()
-FOLDER_ID = "16UY4IslY4KFTo5O1I6MBMzuPF9IQGwuE"  # <-- Replace this with your actual Drive folder ID
 
+FOLDER_ID = "16UY4IslY4KFTo5O1I6MBMzuPF9IQGwuE"  # <-- Replace with your actual folder ID
+
+
+# --- Load CSV files by prefix ---
 def load_drive_csvs_by_prefix(prefix):
+    drive = get_drive()
     file_list = drive.ListFile({'q': f"'{FOLDER_ID}' in parents and trashed=false"}).GetList()
     matching_files = [f for f in file_list if f['title'].startswith(prefix) and f['title'].endswith(".csv")]
 
@@ -50,14 +48,11 @@ def load_drive_csvs_by_prefix(prefix):
         return pd.DataFrame()
 
 
-# Wrapper functions
-@st.cache_data(ttl=3600)
-def load_daily_availability_regional(): return load_drive_csvs_by_prefix("daily_regional")
-@st.cache_data(ttl=3600)
-def load_daily_availability_nop(): return load_drive_csvs_by_prefix("daily_nop")
+# --- Load KPI Excel file from Google Drive ---
 @st.cache_data(ttl=3600)
 def load_kpi_data(sheet_name="KPI_Data"):
     try:
+        drive = get_drive()
         file_list = drive.ListFile({'q': f"'{FOLDER_ID}' in parents and trashed=false"}).GetList()
         target_file = next((f for f in file_list if f['title'].lower() == 'kpi_data.xlsx'), None)
 
@@ -65,11 +60,11 @@ def load_kpi_data(sheet_name="KPI_Data"):
             print("[ERROR] kpi_data.xlsx not found in Drive folder.")
             return pd.DataFrame()
 
-        file_content = target_file.GetContentFile('kpi_data.xlsx')
-        df = pd.read_excel("kpi_data.xlsx", sheet_name=sheet_name, engine="openpyxl")
+        filename = "kpi_data.xlsx"
+        target_file.GetContentFile(filename)
 
-        #print("[DEBUG] Columns loaded:", df.columns.tolist())
-
+        df = pd.read_excel(filename, sheet_name=sheet_name, engine="openpyxl")
+        os.remove(filename)
         return df
 
     except Exception as e:
@@ -80,6 +75,7 @@ def load_kpi_data(sheet_name="KPI_Data"):
 # --- Load Ticketing Data from Google Drive ---
 @st.cache_data(ttl=3600)
 def load_ticketing_data():
+    drive = get_drive()
     daily_frames = []
     mtd_frames = []
     daily_cluster_frames = []
@@ -93,7 +89,6 @@ def load_ticketing_data():
             filename = file['title']
             file.GetContentFile(filename)
 
-            # Read all relevant sheets at once
             all_sheets = pd.read_excel(filename,
                                        sheet_name=["Daily", "MTD", "Daily_Cluster", "MTD_Cluster"],
                                        engine="openpyxl")
@@ -131,20 +126,11 @@ def load_ticketing_data():
     return df_daily, df_mtd, df_daily_cluster, df_mtd_cluster
 
 
-# --- Load Availability Data from Google Drive ---
-@st.cache_data(ttl=3600)
-def load_availability_regional_data():
-    return load_drive_csvs_by_prefix("monthly_regional")
-@st.cache_data(ttl=3600)
-def load_availability_nop_data():
-    return load_drive_csvs_by_prefix("monthly_nop")
-@st.cache_data(ttl=3600)
-def load_availability_site_data():
-    return load_drive_csvs_by_prefix("monthly_site")
-
+# --- Load Worst Site Tracker from Google Drive ---
 @st.cache_data(ttl=3600)
 def load_worst_site_data():
     try:
+        drive = get_drive()
         file_list = drive.ListFile({'q': f"'{FOLDER_ID}' in parents and trashed=false"}).GetList()
         target_file = next((f for f in file_list if f['title'].lower() == 'worst_site.xlsx'), None)
 
@@ -162,3 +148,31 @@ def load_worst_site_data():
     except Exception as e:
         print(f"[ERROR] Failed to load worst site data from Drive: {e}")
         return pd.DataFrame()
+
+
+# --- Wrapper functions for Daily Availability ---
+@st.cache_data(ttl=3600)
+def load_daily_availability_regional():
+    return load_drive_csvs_by_prefix("daily_regional")
+
+@st.cache_data(ttl=3600)
+def load_daily_availability_nop():
+    return load_drive_csvs_by_prefix("daily_nop")
+
+@st.cache_data(ttl=3600)
+def load_daily_availability_site():
+    return load_drive_csvs_by_prefix("daily_site")
+
+
+# --- Wrapper functions for Monthly Availability ---
+@st.cache_data(ttl=3600)
+def load_availability_regional_data():
+    return load_drive_csvs_by_prefix("monthly_regional")
+
+@st.cache_data(ttl=3600)
+def load_availability_nop_data():
+    return load_drive_csvs_by_prefix("monthly_nop")
+
+@st.cache_data(ttl=3600)
+def load_availability_site_data():
+    return load_drive_csvs_by_prefix("monthly_site")

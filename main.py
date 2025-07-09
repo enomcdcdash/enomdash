@@ -24,6 +24,9 @@ def main():
     elif selected_page == "Worst Site":
         from my_pages import worst_site
         worst_site.app()
+    elif selected_page == "Resource Productivity":
+        from my_pages import resource_performance
+        resource_performance.app()
 
 if __name__ == "__main__":
     main()

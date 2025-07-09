@@ -51,5 +51,7 @@ def navigation():
             st.session_state.selected_page = "Daily"
         if st.button("📉 Worst Site Dashboard", use_container_width=True):
             st.session_state.selected_page = "Worst Site"
+        if st.button("👷 Resource Performance", use_container_width=True):
+            st.session_state.selected_page = "Resource Performance"
 
     return st.session_state.selected_page

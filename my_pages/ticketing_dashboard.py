@@ -317,7 +317,8 @@ def app_tab2():
                 yaxis_title="Hours",
                 height=350,
                 margin=dict(t=30, b=30),
-                legend=dict(x=1, y=1.2, xanchor="right", orientation="h")
+                legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
+                hovermode="x unified"
             )
             col.plotly_chart(fig, use_container_width=True)
             #col.plotly_chart(fig, use_container_width=True, key=f"mttr_tab2_{sev}")
@@ -367,7 +368,7 @@ def app_tab2():
                 text=df_d[daily_col],
                 textposition="outside",
                 insidetextanchor="start",
-                textfont=dict(size=10),
+                textfont=dict(size=14),
             ))
 
             # Line: MTD percentage (left Y-axis)
@@ -395,7 +396,8 @@ def app_tab2():
                 yaxis2=dict(title="Daily Count", overlaying='y', side='right', showgrid=False),
                 height=350,
                 margin=dict(t=30, b=30),
-                legend=dict(x=1, y=1.2, xanchor="right", orientation="h")
+                legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
+                hovermode="x unified"
             )
             
             col.plotly_chart(fig, use_container_width=True)
@@ -644,7 +646,8 @@ def app_tab4():
                 yaxis_title="Hours",
                 height=350,
                 margin=dict(t=30, b=30),
-                legend=dict(x=1, y=1.2, xanchor="right", orientation="h")
+                legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
+                hovermode="x unified"
             )
             col.plotly_chart(fig, use_container_width=True, key=f"tab4_severity_chart_{i}_{sev}")
 
@@ -718,7 +721,8 @@ def app_tab4():
                 yaxis2=dict(title="Daily Count", overlaying='y', side='right', showgrid=False),
                 height=350,
                 margin=dict(t=30, b=30),
-                legend=dict(x=1, y=1.2, xanchor="right", orientation="h")
+                legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
+                hovermode="x unified"
             )
 
             # ✅ FIXED: Add unique key

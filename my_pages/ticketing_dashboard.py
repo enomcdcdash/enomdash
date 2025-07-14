@@ -74,6 +74,7 @@ def add_takeover_visit_charts(df_d, df_m, st, prefix=""):
                     height=350,
                     margin=dict(t=30, b=30),
                     legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
+                    hovermode="x unified",
                 )
 
                 # ✅ Now add a UNIQUE key to avoid collisions

@@ -27,6 +27,9 @@ def main():
     elif selected_page == "Resource Productivity":
         from my_pages import resource_performance
         resource_performance.app()
+    elif selected_page == "Ticketing Overview":
+        from my_pages import ticekting_overview
+        ticekting_overview.app()
 
 if __name__ == "__main__":
     main()

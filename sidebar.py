@@ -43,6 +43,8 @@ def navigation():
         # --- Navigation buttons ---
         if st.button("📈 KPI Tracking", use_container_width=True):
             st.session_state.selected_page = "KPI"
+        if st.button("🧮 Ticketing Overview", use_container_width=True):
+            st.session_state.selected_page = "Ticketing Overview"
         if st.button("🎟️ Ticketing Performance", use_container_width=True):
             st.session_state.selected_page = "Ticketing"
         if st.button("📡 Monthly Availability", use_container_width=True):

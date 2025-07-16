@@ -219,3 +219,68 @@ def load_resource_data(sheet_name="Rekap Tiket"):
     except Exception as e:
         print(f"[ERROR] Failed to load resource data ({sheet_name}): {e}")
         return pd.DataFrame()
+
+@st.cache_data(ttl=3600)
+def load_ticketing_overview_data():
+    severity_frames = []
+    rc_cat_frames = []
+    ticket_frames = []
+    dpg_frames = []
+
+    try:
+        drive = get_drive()
+        file_list = drive.ListFile({'q': f"'{FOLDER_ID}' in parents and trashed=false"}).GetList()
+        overview_files = [f for f in file_list if f['title'].startswith("overview") and f['title'].endswith(".xlsx")]
+
+        if not overview_files:
+            print("[WARNING] No 'overview*.xlsx' files found.")
+            return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+        for file in overview_files:
+            try:
+                filename = file['title']
+                file.GetContentFile(filename)
+
+                all_sheets = pd.read_excel(filename, sheet_name=["Severity", "RC_Cat", "Ticket", "DPG"], engine="openpyxl")
+
+                df_sev = all_sheets.get("Severity", pd.DataFrame())
+                df_rc = all_sheets.get("RC_Cat", pd.DataFrame())
+                df_tk = all_sheets.get("Ticket", pd.DataFrame())
+                df_dpg = all_sheets.get("DPG", pd.DataFrame())
+
+                for df in [df_sev, df_rc, df_tk, df_dpg]:
+                    if not df.empty:
+                        df.columns = df.columns.str.strip()
+                        df["Source File"] = filename
+
+                if not df_sev.empty and "Date" in df_sev.columns:
+                    df_sev["Date"] = pd.to_datetime(df_sev["Date"], errors="coerce")
+                    if "Month" not in df_sev.columns:
+                        df_sev["Month"] = df_sev["Date"].dt.month
+                    if "Year" not in df_sev.columns:
+                        df_sev["Year"] = df_sev["Date"].dt.year
+
+                if not df_sev.empty:
+                    severity_frames.append(df_sev)
+                if not df_rc.empty:
+                    rc_cat_frames.append(df_rc)
+                if not df_tk.empty:
+                    ticket_frames.append(df_tk)
+                if not df_dpg.empty:
+                    dpg_frames.append(df_dpg)
+
+                os.remove(filename)
+
+            except Exception as e:
+                print(f"[ERROR] Failed to process {file['title']}: {e}")
+
+        df_severity = pd.concat(severity_frames, ignore_index=True) if severity_frames else pd.DataFrame()
+        df_rc_cat = pd.concat(rc_cat_frames, ignore_index=True) if rc_cat_frames else pd.DataFrame()
+        df_ticket = pd.concat(ticket_frames, ignore_index=True) if ticket_frames else pd.DataFrame()
+        df_dpg = pd.concat(dpg_frames, ignore_index=True) if dpg_frames else pd.DataFrame()
+
+        return df_severity, df_rc_cat, df_ticket, df_dpg
+
+    except Exception as e:
+        print(f"[ERROR] load_ticketing_overview_data: {e}")
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()

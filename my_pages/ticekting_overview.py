@@ -2,13 +2,43 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from utils.data_loader import load_ticketing_overview_data
+import calendar
 
 
 def filter_severity_data(df):
     col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-    month = col1.selectbox("Month", sorted(df['Month'].dropna().unique()))
-    year = col2.selectbox("Year", sorted(df['Year'].dropna().unique(), reverse=True))
+    # Ensure Month and Year columns exist and have valid data
+    df = df.copy()
+    df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
+
+    # Define correct month order
+    month_order = list(calendar.month_name)[1:]  # ['January', ..., 'December']
+
+    # Clean and sort Month as string
+    df = df[df['Month'].isin(month_order)]
+    sorted_months = [m for m in month_order if m in df['Month'].unique()]
+    sorted_years = sorted(df['Year'].dropna().unique().astype(int), reverse=True)
+
+    if not sorted_months or not sorted_years:
+        st.warning("No valid Month or Year data available.")
+        return pd.DataFrame(), "All", "All", "All", "All", "All", None, None
+
+    latest_year = sorted_years[0]
+    latest_months = df[df["Year"] == latest_year]['Month'].dropna().unique().tolist()
+
+    # Get latest month by order
+    latest_month = None
+    for m in reversed(month_order):
+        if m in latest_months:
+            latest_month = m
+            break
+    if latest_month is None:
+        latest_month = sorted_months[-1]
+
+    # Selectboxes with default latest selected
+    month = col1.selectbox("Month", sorted_months, index=sorted_months.index(latest_month))
+    year = col2.selectbox("Year", sorted_years, index=0)
 
     df_base = df[(df["Month"] == month) & (df["Year"] == year)]
 

@@ -465,7 +465,7 @@ def app():
     df_severity, df_rc_cat, df_ticket, df_dpg = load_ticketing_overview_data()
 
     tab1, tab2 = st.tabs([
-        "📊 Severity Overview",
+        "📊 Overview",
         "📄 Problematic Sites"
     ])
 

@@ -438,7 +438,7 @@ def app_tab2(df_ticket, df_dpg):
 
     # Top 20 Recurring Sites Tables
     st.markdown("---")
-    st.markdown(f"### 🏅 Top 20 - All Sites – {filters_summary}")
+    st.markdown(f"### 🏅 Top 20 - All Site Classes – {filters_summary}")
     col_incident, col_event = st.columns(2)
 
     with col_incident:

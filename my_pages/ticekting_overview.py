@@ -300,29 +300,53 @@ def app_tab1(df_severity, df_rc_cat):
 def filter_ticket_data(df):
     col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-    month = col1.selectbox("Month", sorted(df['Month'].dropna().unique()), key="filter_month")
-    year = col2.selectbox("Year", sorted(df['Year'].dropna().unique(), reverse=True), key="filter_year")
+    # Ensure Year is numeric
+    df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
 
+    # Use standard month names for ordering
+    month_order = list(calendar.month_name)[1:]  # ['January', 'February', ..., 'December']
+    df = df[df['Month'].isin(month_order)]
+
+    # Sort months and years from the data
+    months_in_data = df['Month'].dropna().unique().tolist()
+    sorted_months = [m for m in month_order if m in months_in_data]
+
+    sorted_years = sorted(df['Year'].dropna().unique().astype(int), reverse=True)
+
+    # Safe defaults
+    if not sorted_months or not sorted_years:
+        st.warning("⚠️ No valid Month or Year data available.")
+        return pd.DataFrame(), "All", "All", "All", "All", None, None
+
+    latest_year = sorted_years[0]
+    months_for_latest_year = df[df['Year'] == latest_year]['Month'].dropna().unique().tolist()
+    latest_month = next((m for m in reversed(month_order) if m in months_for_latest_year), sorted_months[-1])
+
+    # Month and Year Selectboxes
+    month = col1.selectbox("Month", sorted_months, index=sorted_months.index(latest_month), key="filter_month")
+    year = col2.selectbox("Year", sorted_years, index=0, key="filter_year")
+
+    # Filter base dataframe
     df_base = df[(df["Month"] == month) & (df["Year"] == year)]
 
+    # AREA filter
     area_options = ['All'] + sorted(df_base['Area'].dropna().unique())
     selected_area = col3.selectbox("Area", area_options, key="filter_area")
-
     df_area = df_base if selected_area == 'All' else df_base[df_base['Area'] == selected_area]
 
+    # REGIONAL filter
     regional_options = ['All'] + sorted(df_area['Regional'].dropna().unique())
     selected_regional = col4.selectbox("Regional", regional_options, key="filter_regional")
-
     df_reg = df_area if selected_regional == 'All' else df_area[df_area['Regional'] == selected_regional]
 
+    # NOP filter
     nop_options = ['All'] + sorted(df_reg['NOP'].dropna().unique())
     selected_nop = col5.selectbox("NOP", nop_options, key="filter_nop")
-
     df_nop = df_reg if selected_nop == 'All' else df_reg[df_reg['NOP'] == selected_nop]
 
+    # CLUSTER TO filter
     cluster_options = ['All'] + sorted(df_nop['Cluster TO'].dropna().unique())
     selected_cluster = col6.selectbox("Cluster TO", cluster_options, key="filter_cluster")
-
     df_filtered = df_nop if selected_cluster == 'All' else df_nop[df_nop['Cluster TO'] == selected_cluster]
 
     return df_filtered, selected_area, selected_regional, selected_nop, selected_cluster, month, year

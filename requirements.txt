@@ -5,3 +5,4 @@ pydrive2
 plotly 
 oauth2client
 xlsxwriter
+numpy

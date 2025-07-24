@@ -284,3 +284,45 @@ def load_ticketing_overview_data():
     except Exception as e:
         print(f"[ERROR] load_ticketing_overview_data: {e}")
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+@st.cache_data(ttl=3600)
+def load_daily_resource_data(sheet_name="Ticket Summary"):
+    try:
+        file_list = drive.ListFile({'q': f"'{FOLDER_ID}' in parents and trashed=false"}).GetList()
+        resource_files = [f for f in file_list if f['title'].lower().startswith('dailyresource') and f['title'].endswith('.xlsx')]
+
+        if not resource_files:
+            print("[WARNING] No resource*.xlsx files found in Drive folder.")
+            return pd.DataFrame()
+
+        df_list = []
+        for file in resource_files:
+            try:
+                filename = file['title']
+                file.GetContentFile(filename)
+
+                df = pd.read_excel(filename, sheet_name=sheet_name, engine="openpyxl")
+
+                df.columns = (
+                    df.columns
+                    .str.replace(r"\xa0", " ", regex=True)
+                    .str.replace(r"[–‐‑−]", "-", regex=True)
+                    .str.strip()
+                )
+
+                df['Source File'] = filename
+                df_list.append(df)
+                os.remove(filename)
+            except Exception as e:
+                print(f"[ERROR] Failed to load {file['title']} ({sheet_name}): {e}")
+
+        if df_list:
+            combined_df = pd.concat(df_list, ignore_index=True)
+            combined_df.drop_duplicates(inplace=True)
+            return combined_df
+        else:
+            return pd.DataFrame()
+
+    except Exception as e:
+        print(f"[ERROR] Failed to load resource data ({sheet_name}): {e}")
+        return pd.DataFrame()

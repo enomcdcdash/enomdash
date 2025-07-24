@@ -288,6 +288,7 @@ def load_ticketing_overview_data():
 @st.cache_data(ttl=3600)
 def load_daily_resource_data(sheet_name="Ticket Summary"):
     try:
+        drive = get_drive()
         file_list = drive.ListFile({'q': f"'{FOLDER_ID}' in parents and trashed=false"}).GetList()
         resource_files = [f for f in file_list if f['title'].lower().startswith('dailyresource') and f['title'].endswith('.xlsx')]
 

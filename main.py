@@ -30,6 +30,9 @@ def main():
     elif selected_page == "Ticketing Overview":
         from my_pages import ticekting_overview
         ticekting_overview.app()
+    elif selected_page == "Daily Resource":
+        from my_pages import daily_resource
+        daily_resource.app()
 
 if __name__ == "__main__":
     main()

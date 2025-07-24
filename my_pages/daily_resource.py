@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from utils.data_loader import load_daily_resource_data
 import streamlit.components.v1 as components
+import numpy as np
 
 def app_tab1():
     st.subheader("📊 Daily Team Productivity")
@@ -58,8 +59,12 @@ def app_tab1():
         "IM-Total" : "sum"
     }).reset_index()
 
-    grouped["%Takeover"] = grouped["Total TO"] / grouped["Total Tickets_x"]
-    grouped["%Visit"] = grouped["Total-Visit_x"] / grouped["Total TO"]
+    grouped["%Takeover"] = grouped["Total TO"] / grouped["Total Tickets_x"].replace({0: np.nan})
+    grouped["%Visit"] = grouped["Total-Visit_x"] / grouped["Total TO"].replace({0: np.nan})
+
+    # Fill NaNs with 0.0 so Plotly will still plot the point
+    grouped["%Takeover"] = grouped["%Takeover"].fillna(0.0)
+    grouped["%Visit"] = grouped["%Visit"].fillna(0.0)
     grouped["%Takeover_text"] = (grouped["%Takeover"] * 100).round(2).astype(str) + "%"
     grouped["%Visit_text"] = (grouped["%Visit"] * 100).round(2).astype(str) + "%"
 
@@ -256,8 +261,10 @@ def app_tab1():
         "BPS-Visit": "sum"
     }).reset_index()
 
-    grouped_bps["BPS-%Takeover"] = grouped_bps["BPS-Takeover"] / grouped_bps["BPS-Total"]
-    grouped_bps["BPS-%Visit"] = grouped_bps["BPS-Visit"] / grouped_bps["BPS-Takeover"]
+    grouped_bps["BPS-%Takeover"] = grouped_bps["BPS-Takeover"] / grouped_bps["BPS-Total"].replace({0: np.nan})
+    grouped_bps["BPS-%Visit"] = grouped_bps["BPS-Visit"] / grouped_bps["BPS-Takeover"].replace({0: np.nan})
+    grouped_bps["BPS-%Takeover"] = grouped_bps["BPS-%Takeover"].fillna(0.0)
+    grouped_bps["BPS-%Visit"] = grouped_bps["BPS-%Visit"].fillna(0.0)
     grouped_bps["BPS-%Takeover_text"] = (grouped_bps["BPS-%Takeover"] * 100).round(2).astype(str) + "%"
     grouped_bps["BPS-%Visit_text"] = (grouped_bps["BPS-%Visit"] * 100).round(2).astype(str) + "%"
 
@@ -268,8 +275,10 @@ def app_tab1():
         "TS-Visit": "sum"
     }).reset_index()
 
-    grouped_ts["TS-%Takeover"] = grouped_ts["TS-Takeover"] / grouped_ts["TS-Total"]
-    grouped_ts["TS-%Visit"] = grouped_ts["TS-Visit"] / grouped_ts["TS-Takeover"]
+    grouped_ts["TS-%Takeover"] = grouped_ts["TS-Takeover"] / grouped_ts["TS-Total"].replace({0: np.nan})
+    grouped_ts["TS-%Visit"] = grouped_ts["TS-Visit"] / grouped_ts["TS-Takeover"].replace({0: np.nan})
+    grouped_ts["TS-%Takeover"] = grouped_ts["TS-%Takeover"].fillna(0.0)
+    grouped_ts["TS-%Visit"] = grouped_ts["TS-%Visit"].fillna(0.0)
     grouped_ts["TS-%Takeover_text"] = (grouped_ts["TS-%Takeover"] * 100).round(2).astype(str) + "%"
     grouped_ts["TS-%Visit_text"] = (grouped_ts["TS-%Visit"] * 100).round(2).astype(str) + "%"
     

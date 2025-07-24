@@ -55,5 +55,7 @@ def navigation():
             st.session_state.selected_page = "Worst Site"
         if st.button("👷 Team Productivity", use_container_width=True):
             st.session_state.selected_page = "Resource Productivity"
+        if st.button("🧑‍🔧 Daily Team Productivity", use_container_width=True):  # <-- NEW BUTTON
+            st.session_state.selected_page = "Daily Resource"
 
     return st.session_state.selected_page

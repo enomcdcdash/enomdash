@@ -535,7 +535,13 @@ def app_tab2():
         fig_bps.update_layout(
             barmode="stack",
             title="📊 BPS Status per Date",
-            xaxis_title="Date",
+            xaxis=dict(
+                title=dict(text="Date", font=dict(size=16)),
+                tickmode="linear",
+                dtick=86400000.0,
+                tickformat="%d-%b",
+                tickangle=-45  # Optional: to avoid overlapping labels
+            ),
             yaxis_title="Jumlah PIC",
             hovermode="x unified",
             hoverlabel=dict(bgcolor="honeydew", font_size=14, font_family="Segoe UI"),
@@ -561,7 +567,13 @@ def app_tab2():
         fig_ts.update_layout(
             barmode="stack",
             title="📊 TS Status per Date",
-            xaxis_title="Date",
+            xaxis=dict(
+                title=dict(text="Date", font=dict(size=16)),
+                tickmode="linear",
+                dtick=86400000.0,
+                tickformat="%d-%b",
+                tickangle=-45  # Optional: to avoid overlapping labels
+            ),
             yaxis_title="Jumlah PIC",
             hovermode="x unified",
             hoverlabel=dict(bgcolor="honeydew", font_size=14, font_family="Segoe UI"),

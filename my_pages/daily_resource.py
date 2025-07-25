@@ -140,7 +140,7 @@ def app_tab1():
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.1,
+            y=-0.2,
             xanchor="right",
             x=1,
             font=dict(size=16)
@@ -256,7 +256,7 @@ def app_tab1():
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.1,
+            y=-0.2,
             xanchor="right",
             x=1,
             font=dict(size=16)

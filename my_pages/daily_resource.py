@@ -112,7 +112,13 @@ def app_tab1():
 
     fig.update_layout(
         title="📈 Productivity: Total FME vs %Takeover vs %Visit",
-        xaxis=dict(title=dict(text="Date", font=dict(size=16))),
+        xaxis=dict(
+            title=dict(text="Date", font=dict(size=16)),
+            tickmode="linear",
+            dtick=86400000.0,
+            tickformat="%d-%b",
+            tickangle=-45  # Optional: to avoid overlapping labels
+        ),
         yaxis=dict(
             title=dict(text="Total FME", font=dict(color="steelblue", size=16)),
             tickfont=dict(color="steelblue")
@@ -222,7 +228,13 @@ def app_tab1():
     fig2.update_layout(
         title="📊 IM (Incident)/EM (Event) Tickets vs Total Tickets vs %Takeover vs %Visit",
         barmode="stack",
-        xaxis=dict(title=dict(text="Date", font=dict(size=16))),
+        xaxis=dict(
+            title=dict(text="Date", font=dict(size=16)),
+            tickmode="linear",
+            dtick=86400000.0,
+            tickformat="%d-%b",
+            tickangle=-45  # Optional: to avoid overlapping labels
+        ),
         yaxis=dict(
             title=dict(text="Ticket Volume", font=dict(color="steelblue", size=16)),
             tickfont=dict(color="steelblue")
@@ -335,7 +347,13 @@ def app_tab1():
 
         fig_bps.update_layout(
             title="👷‍♂️ BPS Productivity",
-            xaxis=dict(title=dict(text="Date", font=dict(size=16))),
+            xaxis=dict(
+                title=dict(text="Date", font=dict(size=16)),
+                tickmode="linear",
+                dtick=86400000.0,
+                tickformat="%d-%b",
+                tickangle=-45  # Optional: to avoid overlapping labels
+            ),
             yaxis=dict(
                 title=dict(text="BPS-Total", font=dict(size=16, color="steelblue")),
                 tickfont=dict(color="steelblue")
@@ -401,7 +419,13 @@ def app_tab1():
 
         fig_ts.update_layout(
             title="🧰 TS Productivity",
-            xaxis=dict(title=dict(text="Date", font=dict(size=16))),
+            xaxis=dict(
+                title=dict(text="Date", font=dict(size=16)),
+                tickmode="linear",
+                dtick=86400000.0,
+                tickformat="%d-%b",
+                tickangle=-45  # Optional: to avoid overlapping labels
+            ),
             yaxis=dict(
                 title=dict(text="TS-Total", font=dict(size=16, color="steelblue")),
                 tickfont=dict(color="steelblue")

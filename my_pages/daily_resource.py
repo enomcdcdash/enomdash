@@ -796,14 +796,14 @@ def app():
     col1, col2 = st.columns([9, 1])
 
     with col1:
-        st.title("👷 Resource Performance")
+        st.title("📅 Daily Team Productivity Dashboard")
 
     with col2:
         if st.button("🔄 Refresh Data", help="Reload resource data"):
             st.cache_data.clear()
             st.rerun()
             
-    st.title("📅 Daily Team Productivity Dashboard")
+    
     tab1, tab2 = st.tabs(["🎟️ Rekap Tiket Daily", "📊 Daily Rekap Resource"])
 
     with tab1:

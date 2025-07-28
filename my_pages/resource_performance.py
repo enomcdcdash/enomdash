@@ -88,38 +88,63 @@ def app_tab1():
         x=fme_grouped["Month_Display"],
         y=fme_grouped["Total FME"],
         name="Total FME",
-        marker_color="#1f77b4",
-        opacity=0.7,
+        #marker_color="#1f77b4",
+        marker_color="lavender",
+        opacity=0.9,
         text=fme_grouped["Total FME"],
         textposition="inside",  # shows text inside the bar
         insidetextanchor="start",  # anchor text to the bottom inside
-        textfont=dict(color="white", size=14),  # 👈 adjust font size here
-        yaxis="y1"
+        textfont=dict(color="darkblue", size=14),  # 👈 adjust font size here
+        yaxis="y1",
+        hovertemplate='Total FME: %{y}<extra></extra>'
     ))
 
     # Line: %TO
     fig_fme.add_trace(go.Scatter(
         x=fme_grouped["Month_Display"], y=fme_grouped["%TO"],
         name="%TO", mode="lines+markers+text", yaxis="y2",
-        line=dict(color="#2ca02c", width=4),
+        #line=dict(color="#2ca02c", width=4),
+        line=dict(color="#1f77b4", width=4),
         text=fme_grouped["%TO"].apply(lambda x: f"{x:.2%}"),
         textposition="top center",
-        textfont=dict(color="black", size=14)
+        textfont=dict(color="black", size=14),
+        hovertemplate='%Takeover: %{y:.2%}<extra></extra>'
     ))
 
     fig_fme.update_layout(
         title=f"📊 Total FME vs %Takeover - {selected_area} | {selected_regional} | {selected_nop}",
-        xaxis=dict(title="Month"),
-        yaxis=dict(title="Total FME", side="left"),
+        xaxis=dict(
+            title="Month",
+            tickfont=dict(size=14),
+        ),
+        yaxis=dict(
+            title="Total FME",
+            side="left",
+            tickfont=dict(size=14),
+        ),
         yaxis2=dict(
             title="%TO",
             overlaying="y",
             side="right",
             tickformat=".0%",
-            range=[0, 1]
+            range=[0, 1],
+            tickfont=dict(size=14),
+            showgrid=False
         ),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            font=dict(size=12)
+        ),
         hovermode="x unified",
+        hoverlabel=dict(
+            bgcolor="mintcream",
+            font_size=14,
+            font_family="Arial"
+        ),
         height=400,
         margin=dict(t=60, b=40)
     )
@@ -150,62 +175,60 @@ def app_tab1():
 
     fig.add_trace(go.Bar(
         x=grouped["Month_Display"], y=grouped["Total Tickets"],
-        name="Total Tickets", marker_color="#1f77b4", opacity=0.7,
+        #name="Total Tickets", marker_color="#1f77b4", opacity=0.7,
+        name="Total Tickets", marker_color="powderblue", opacity=0.95,
         text=grouped["Total Tickets"],
         textposition="inside",
         insidetextanchor="start",
-        textfont=dict(color="white", size=14)
+        textfont=dict(color="blue", size=16),
+        hovertemplate="Total Tickets: %{y}<extra></extra>"
     ))
     fig.add_trace(go.Bar(
         x=grouped["Month_Display"], y=grouped["Total TO"],
-        name="Total TO", marker_color="#ff7f0e", opacity=0.7,
+        #name="Total TO", marker_color="#ff7f0e", opacity=0.7,
+        name="Total TO", marker_color="lemonchiffon", opacity=0.95,
         text=grouped["Total TO"],
         textposition="inside",
         insidetextanchor="start",
-        textfont=dict(color="white", size=14)
+        textfont=dict(color="#ff7f0e", size=16),
+        hovertemplate="Total Takeover: %{y}<extra></extra>"
     ))
     fig.add_trace(go.Bar(
         x=grouped["Month_Display"], y=grouped["Total-Visit"],
-        name="Total Visit", marker_color="#9467bd", opacity=0.7,
+        #name="Total Visit", marker_color="#9467bd", opacity=0.7,
+        name="Total Visit", marker_color="peachpuff", opacity=0.95,
         text=grouped["Total-Visit"],
         textposition="inside",
         insidetextanchor="start",
-        textfont=dict(color="white", size=14)
+        textfont=dict(color="#2ca02c", size=16),
+        hovertemplate="Total Visit: %{y}<extra></extra>"
     ))
 
-    # Line chart for %TO
     fig.add_trace(go.Scatter(
-        x=grouped["Month_Display"], y=grouped["%TO"],
-        name="%TO", mode="lines+markers", yaxis="y2",
-        line=dict(color="#2ca02c", width=3),
-        showlegend=True
-    ))
-
-    # Add label trace for %TO
-    fig.add_trace(go.Scatter(
-        x=grouped["Month_Display"], y=grouped["%TO"],
-        mode="text", yaxis="y2",
+        x=grouped["Month_Display"],
+        y=grouped["%TO"],
+        name="%TO",
+        mode="lines+markers+text",  # 👈 combines line, markers, and text
+        yaxis="y2",
+        line=dict(color="#1f77b4", width=4),
         text=grouped["%TO"].apply(lambda x: f"{x:.2%}"),
         textposition="top center",
-        textfont=dict(color="#2ca02c", size=14),
-        showlegend=False  # Don't show a second legend item
-    ))
-    # Line chart for %Visit
-    fig.add_trace(go.Scatter(
-        x=grouped["Month_Display"], y=grouped["%Visit"],
-        name="%Visit", mode="lines+markers", yaxis="y2",
-        line=dict(color="#d62728", width=3, dash="dash"),
+        textfont=dict(color="#1f77b4", size=14),
+        hovertemplate="%Takeover: %{y:.2%}<extra></extra>",
         showlegend=True
     ))
-
-    # Add label trace for %Visit
     fig.add_trace(go.Scatter(
-        x=grouped["Month_Display"], y=grouped["%Visit"],
-        mode="text", yaxis="y2",
-        text=grouped["%Visit"].apply(lambda x: f"{x:.2%}"),
+        x=grouped["Month_Display"],
+        y=grouped["%Visit"],
+        name="%Visit",
+        mode="lines+markers+text",  # 👈 combines line, markers, and text
+        yaxis="y2",
+        line=dict(color="#2ca02c", width=4),
+        text=grouped["%Visit"].apply(lambda x: f"{x:.2%}"),  # Label text
         textposition="top center",
-        textfont=dict(color="#d62728", size=14),
-        showlegend=False
+        textfont=dict(color="#2ca02c", size=14),
+        hovertemplate="%Visit: %{y:.2%}<extra></extra>",  # 👈 Custom hover
+        showlegend=True
     ))
 
     fig.update_layout(
@@ -217,13 +240,19 @@ def app_tab1():
             overlaying="y",
             side="right",
             tickformat=".0%",
-            range=[0, 1.1]
+            range=[0, 1.1],
+            showgrid=False
         ),
         barmode="group",
         hovermode="x unified",
+        hoverlabel=dict(
+            bgcolor="lightcyan",
+            font_size=14,
+            font_family="Arial"
+        ),
         legend=dict(
-            orientation="h", yanchor="bottom", y=-0.4,
-            xanchor="center", x=0.5, title=None
+            orientation="h", yanchor="bottom", y=-0.3,
+            xanchor="right", x=1.0, title=None
         ),
         margin=dict(t=60, b=80)
     )
@@ -251,21 +280,27 @@ def app_tab1():
     ).sort_values("Month_Parsed")
 
         fig_im = go.Figure()
-        fig_im.add_trace(go.Bar(x=im_grouped["Month_Display"], y=im_grouped["IM-Total"], name="IM-Total", marker_color="#1f77b4", opacity=0.7, text=im_grouped["IM-Total"], textposition="inside", insidetextanchor="start", textfont=dict(size=14)))
-        fig_im.add_trace(go.Bar(x=im_grouped["Month_Display"], y=im_grouped["IM-Takeover"], name="IM-Takeover", marker_color="#ff7f0e", opacity=0.7, text=im_grouped["IM-Takeover"], textposition="inside", insidetextanchor="start", textfont=dict(size=14)))
-        fig_im.add_trace(go.Bar(x=im_grouped["Month_Display"], y=im_grouped["IM-Visit"], name="IM-Visit", marker_color="#9467bd", opacity=0.7, text=im_grouped["IM-Visit"], textposition="inside", insidetextanchor="start", textfont=dict(size=14)))
+        fig_im.add_trace(go.Bar(x=im_grouped["Month_Display"], y=im_grouped["IM-Total"], name="IM-Total", marker_color="powderblue", opacity=0.95, text=im_grouped["IM-Total"], textposition="inside", insidetextanchor="start", textfont=dict(color="blue", size=14), hovertemplate="Total-IM-Tickets: %{y}<extra></extra>"))
+        fig_im.add_trace(go.Bar(x=im_grouped["Month_Display"], y=im_grouped["IM-Takeover"], name="IM-Takeover", marker_color="lemonchiffon", opacity=0.95, text=im_grouped["IM-Takeover"], textposition="inside", insidetextanchor="start", textfont=dict(color="#ff7f0e", size=14), hovertemplate="IM-Takeover: %{y}<extra></extra>"))
+        fig_im.add_trace(go.Bar(x=im_grouped["Month_Display"], y=im_grouped["IM-Visit"], name="IM-Visit", marker_color="peachpuff", opacity=0.95, text=im_grouped["IM-Visit"], textposition="inside", insidetextanchor="start", textfont=dict(color="#2ca02c", size=14), hovertemplate="IM-Visit: %{y}<extra></extra>"))
 
         fig_im.add_trace(go.Scatter(
             x=im_grouped["Month_Display"], y=im_grouped["IM-%Takeover"],
-            name="IM-%Takeover", yaxis="y2", mode="lines+markers",
-            line=dict(color="#2ca02c", width=4),
-            hovertemplate="%{x}<br>IM-%Takeover: %{y:.2%}<extra></extra>"
+            name="IM-%Takeover", mode="lines+markers+text", yaxis="y2", 
+            line=dict(color="#1f77b4", width=4),
+            text=im_grouped["IM-%Takeover"].apply(lambda x: f"{x:.2%}"),
+            textposition="top center",
+            textfont=dict(color="#1f77b4", size=14),
+            hovertemplate="IM-%Takeover: %{y:.2%}<extra></extra>"
         ))
         fig_im.add_trace(go.Scatter(
             x=im_grouped["Month_Display"], y=im_grouped["IM-%Visit"],
-            name="IM-%Visit", yaxis="y2", mode="lines+markers",
-            line=dict(color="#d62728", width=4, dash="dash"),
-            hovertemplate="%{x}<br>IM-%Visit: %{y:.2%}<extra></extra>"
+            name="IM-%Visit", mode="lines+markers+text", yaxis="y2",
+            line=dict(color="#038919", width=4),
+            text=im_grouped["IM-%Visit"].apply(lambda x: f"{x:.2%}"),
+            textposition="top center",
+            textfont=dict(color="#038919", size=14),
+            hovertemplate="IM-%Visit: %{y:.2%}<extra></extra>"
         ))
 
         fig_im.update_layout(
@@ -273,12 +308,20 @@ def app_tab1():
             title=title_text_incident,
             xaxis_title="Month",
             yaxis=dict(title="Count", side="left"),
-            yaxis2=dict(title="% Takeover / Visit", overlaying="y", side="right", tickformat=".0%", range=[0, 1.1]),
+            yaxis2=dict(title="% Takeover / Visit", overlaying="y", side="right", tickformat=".0%", range=[0, 1.1], showgrid=False),
             barmode="group",
             hovermode="x unified",
-            legend=dict(orientation="h", yanchor="bottom", y=-0.4, xanchor="center", x=0.5, title=None),
+            hoverlabel=dict(
+                bgcolor="lightcyan",
+                font_size=14,
+                font_family="Arial"
+            ),
+            legend=dict(
+                orientation="h", yanchor="bottom", y=-0.3,
+                xanchor="right", x=1.0, title=None
+            ),
             margin=dict(t=40, b=80)
-        )
+            )
         st.plotly_chart(fig_im, use_container_width=True)
 
     # ------------------------ EM CHART ------------------------
@@ -296,21 +339,27 @@ def app_tab1():
         ).sort_values("Month_Parsed")
 
         fig_em = go.Figure()
-        fig_em.add_trace(go.Bar(x=em_grouped["Month_Display"], y=em_grouped["EM-Total"], name="EM-Total", marker_color="#1f77b4", opacity=0.7, text=em_grouped["EM-Total"], textposition="inside", insidetextanchor="start", textfont=dict(size=14)))
-        fig_em.add_trace(go.Bar(x=em_grouped["Month_Display"], y=em_grouped["EM-Takeover"], name="EM-Takeover", marker_color="#ff7f0e", opacity=0.7, text=em_grouped["EM-Takeover"], textposition="inside", insidetextanchor="start", textfont=dict(size=14)))
-        fig_em.add_trace(go.Bar(x=em_grouped["Month_Display"], y=em_grouped["EM-Visit"], name="EM-Visit", marker_color="#9467bd", opacity=0.7, text=em_grouped["EM-Visit"], textposition="inside", insidetextanchor="start", textfont=dict(size=14)))
+        fig_em.add_trace(go.Bar(x=em_grouped["Month_Display"], y=em_grouped["EM-Total"], name="EM-Total", marker_color="powderblue", opacity=0.95, text=em_grouped["EM-Total"], textposition="inside", insidetextanchor="start", textfont=dict(color="blue", size=14), hovertemplate="Total-EM-Tickets: %{y}<extra></extra>"))
+        fig_em.add_trace(go.Bar(x=em_grouped["Month_Display"], y=em_grouped["EM-Takeover"], name="EM-Takeover", marker_color="lemonchiffon", opacity=0.95, text=em_grouped["EM-Takeover"], textposition="inside", insidetextanchor="start", textfont=dict(color="#ff7f0e", size=14), hovertemplate="EM-Takeover: %{y}<extra></extra>"))
+        fig_em.add_trace(go.Bar(x=em_grouped["Month_Display"], y=em_grouped["EM-Visit"], name="EM-Visit", marker_color="peachpuff", opacity=0.95, text=em_grouped["EM-Visit"], textposition="inside", insidetextanchor="start", textfont=dict(color="#2ca02c", size=14), hovertemplate="EM-Visit: %{y}<extra></extra>"))
 
         fig_em.add_trace(go.Scatter(
             x=em_grouped["Month_Display"], y=em_grouped["EM-%Takeover"],
-            name="EM-%Takeover", yaxis="y2", mode="lines+markers",
-            line=dict(color="#2ca02c", width=4),
-            hovertemplate="%{x}<br>EM-%Takeover: %{y:.2%}<extra></extra>"
+            name="EM-%Takeover",  mode="lines+markers+text", yaxis="y2",
+            line=dict(color="#1f77b4", width=4),
+            text=em_grouped["EM-%Takeover"].apply(lambda x: f"{x:.2%}"),
+            textposition="top center",
+            textfont=dict(color="#1f77b4", size=14),
+            hovertemplate="EM-%Takeover: %{y:.2%}<extra></extra>"
         ))
         fig_em.add_trace(go.Scatter(
             x=em_grouped["Month_Display"], y=em_grouped["EM-%Visit"],
-            name="EM-%Visit", yaxis="y2", mode="lines+markers",
-            line=dict(color="#d62728", width=4, dash="dash"),
-            hovertemplate="%{x}<br>EM-%Visit: %{y:.2%}<extra></extra>"
+            name="EM-%Visit", yaxis="y2", mode="lines+markers+text",
+            line=dict(color="#038919", width=4),
+            text=em_grouped["EM-%Visit"].apply(lambda x: f"{x:.2%}"),
+            textposition="top center",
+            textfont=dict(color="#038919", size=14),
+            hovertemplate="EM-%Visit: %{y:.2%}<extra></extra>"
         ))
 
         fig_em.update_layout(
@@ -318,10 +367,18 @@ def app_tab1():
             title=title_text_event,
             xaxis_title="Month",
             yaxis=dict(title="Count", side="left"),
-            yaxis2=dict(title="% Takeover / Visit", overlaying="y", side="right", tickformat=".0%", range=[0, 1.1]),
+            yaxis2=dict(title="% Takeover / Visit", overlaying="y", side="right", tickformat=".0%", range=[0, 1.1], showgrid=False),
             barmode="group",
             hovermode="x unified",
-            legend=dict(orientation="h", yanchor="bottom", y=-0.4, xanchor="center", x=0.5, title=None),
+            hoverlabel=dict(
+                bgcolor="lightcyan",
+                font_size=14,
+                font_family="Arial"
+            ),
+            legend=dict(
+                orientation="h", yanchor="bottom", y=-0.3,
+                xanchor="right", x=1.0, title=None
+            ),
             margin=dict(t=40, b=80)
         )
         st.plotly_chart(fig_em, use_container_width=True)

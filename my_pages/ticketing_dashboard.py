@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 from utils.data_loader import load_ticketing_data
 
 # 2. Add takeover/visit charts function FIRST
-def add_takeover_visit_charts(df_d, df_m, st, prefix=""):
+def add_takeover_visit_charts(df_d, df_m, st):
     chart_config = [
         {"title": "Takeover", "daily": "IM-TO-Daily", "mtd": "IM-%TO-MTD", "target": 80},
         {"title": "Takeover High", "daily": "IM-TO-High-Daily", "mtd": "IM-%TO-High-MTD", "target": 80},
@@ -17,69 +17,86 @@ def add_takeover_visit_charts(df_d, df_m, st, prefix=""):
 
     for i in range(0, len(chart_config), 2):
         col1, col2 = st.columns(2)
-        for j, (col, cfg) in enumerate(zip([col1, col2], chart_config[i:i+2])):
-            with col.container():
-                daily_col = cfg["daily"]
-                mtd_col = cfg["mtd"]
-                target_val = cfg["target"]
-                title = cfg["title"]
+        for col, cfg in zip([col1, col2], chart_config[i:i+2]):
+            daily_col = cfg["daily"]
+            mtd_col = cfg["mtd"]
+            target_val = cfg["target"]
+            title = cfg["title"]
 
-                if daily_col not in df_d.columns or mtd_col not in df_m.columns:
-                    st.warning(f"Missing required columns for {title}")
-                    continue
+            if daily_col not in df_d.columns or mtd_col not in df_m.columns:
+                col.warning(f"Missing required columns for {title}")
+                continue
 
-                df_d = df_d.sort_values("Date")
-                df_m = df_m.sort_values("Date").copy()
+            df_d = df_d.sort_values("Date")
+            df_m = df_m.sort_values("Date").copy()
 
-                if df_m[mtd_col].dtype == 'object':
-                    df_m[mtd_col] = df_m[mtd_col].str.replace('%', '').astype(float)
+            if df_m[mtd_col].dtype == 'object':
+                df_m[mtd_col] = df_m[mtd_col].str.replace('%', '').astype(float)
 
-                fig = go.Figure()
+            fig = go.Figure()
 
-                fig.add_trace(go.Bar(
-                    x=df_d["Date"],
-                    y=df_d[daily_col],
-                    name="Daily (count)",
-                    yaxis="y2",
-                    marker_color="#2FB1F2",
-                    opacity=0.6,
-                    text=df_d[daily_col],
-                    textposition="inside",
-                    insidetextanchor="start"
-                ))
+            fig.add_trace(go.Bar(
+                x=df_d["Date"],
+                y=df_d[daily_col],
+                name="Daily (count)",
+                yaxis="y2",
+                marker_color="#2FB1F2",
+                opacity=0.6,
+                text=df_d[daily_col],
+                textposition="inside",
+                insidetextanchor="start",
+                textfont=dict(color="black", size=16),
+                hovertemplate="Daily Count: %{y}<extra></extra>"
+            ))
 
-                fig.add_trace(go.Scatter(
-                    x=df_m["Date"],
-                    y=df_m[mtd_col] * 100,
-                    mode="lines+markers",
-                    name="MTD (%)",
-                    line=dict(color="#2CA02C", width=3),
-                    yaxis="y1"
-                ))
+            fig.add_trace(go.Scatter(
+                x=df_m["Date"],
+                y=df_m[mtd_col] * 100,
+                mode="lines+markers+text",
+                name="MTD (%)",
+                line=dict(color="#2CA02C", width=3),
+                text=[f"{v:.2f}%" for v in df_m[mtd_col] * 100],
+                textposition="top center",
+                textfont=dict(size=14, color="#2CA02C"),
+                yaxis="y1",
+                hovertemplate="MTD: %{y:.2f}%<extra></extra>"
+            ))
 
-                fig.add_trace(go.Scatter(
-                    x=df_m["Date"],
-                    y=[target_val] * len(df_m),
-                    mode="lines",
-                    name="Target",
-                    line=dict(color="#D62728", dash="dash"),
-                    yaxis="y1"
-                ))
+            fig.add_trace(go.Scatter(
+                x=df_m["Date"],
+                y=[target_val] * len(df_m),
+                mode="lines",
+                name="Target",
+                line=dict(color="#D62728", dash="dash"),
+                yaxis="y1",
+                hovertemplate="Target: %{y:.0f}%<extra></extra>"
+            ))
 
-                fig.update_layout(
-                    title=f"{title} Performance",
-                    xaxis=dict(title="Date"),
-                    yaxis=dict(title="Percentage (%)", range=[0, 100], showgrid=False),
-                    yaxis2=dict(title="Daily Count", overlaying='y', side='right', showgrid=False),
-                    height=350,
-                    margin=dict(t=30, b=30),
-                    legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
-                    hovermode="x unified",
+            fig.update_layout(
+                title=f"{title} Performance",
+                xaxis=dict(title="Date"),
+                yaxis=dict(title="Percentage (%)", range=[0, 100], showgrid=False),
+                yaxis2=dict(title="Daily Count", overlaying='y', side='right', showgrid=False),
+                height=350,
+                margin=dict(t=30, b=30),
+                hovermode="x unified",
+                hoverlabel=dict(
+                    bgcolor="mintcream",
+                    font_size=14,
+                    font_family="Arial"
+                ),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=-0.3,
+                    xanchor="right",
+                    x=1,
+                    font=dict(size=14)
                 )
+            )
 
-                # ✅ Now add a UNIQUE key to avoid collisions
-                chart_key = f"{prefix}_chart_{i}_{j}_{title.replace(' ', '_')}"
-                st.plotly_chart(fig, use_container_width=True, key=chart_key)
+            # ✅ Removed invalid `key` argument
+            col.plotly_chart(fig, use_container_width=True)
             
 
 def app_tab1():
@@ -194,9 +211,13 @@ def app_tab1():
             fig.add_trace(go.Scatter(
                 x=df_m["Date"],
                 y=df_m[mtd_col],
-                mode="lines+markers",
+                mode="lines+markers+text",
                 name="MTD",
                 line=dict(color="green", width=3),
+                text=[f"{v:.2f}" for v in df_m[mtd_col]],
+                textposition="top center",
+                textfont=dict(size=14, color="green"),
+                hovertemplate="MTD: %{y:.2f}<extra></extra>",
             ))
 
             # Add Target line (dashed red)
@@ -210,11 +231,30 @@ def app_tab1():
 
             fig.update_layout(
                 title=f"{sev} MTTR P90",
-                xaxis_title="Date",
-                yaxis_title="Hours",
+                xaxis=dict(
+                    title="Date",
+                    showgrid=False  # Hide vertical grid lines
+                ),
+                yaxis=dict(
+                    title="Hours",
+                    showgrid=False  # Hide horizontal grid lines
+                ),
                 height=350,
                 margin=dict(t=30, b=30),
                 hovermode="x unified",
+                hoverlabel=dict(
+                    bgcolor="mintcream",
+                    font_size=14,
+                    font_family="Arial"
+                ),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=-0.3,
+                    xanchor="right",
+                    x=1,
+                    font=dict(size=14)
+                )
             )
             #col.plotly_chart(fig, use_container_width=True, key=f"{sev}_mttr_chart")
             col.plotly_chart(fig, use_container_width=True)
@@ -222,7 +262,7 @@ def app_tab1():
     #st.markdown("---")
     #st.subheader("📌 Additional Ticketing KPIs")
 
-    add_takeover_visit_charts(df_d, df_m, st, prefix="incident")
+    add_takeover_visit_charts(df_d, df_m, st)
 
 
 def app_tab2():
@@ -306,19 +346,50 @@ def app_tab2():
                                      fill="tozeroy", fillcolor="rgba(47, 177, 242, 0.2)"))
             fig.add_trace(go.Scatter(x=df_d["Date"], y=df_m[mtd_col],
                                      mode="lines+markers", name="MTD",
-                                     line=dict(color="green", width=3)))
+                                     line=dict(color="green", width=3),
+                                     hovertemplate="MTD: %{y:.2f}<extra></extra>"))
             fig.add_trace(go.Scatter(x=df_d["Date"], y=[target_val] * len(df_d),
                                      mode="lines", name="Target",
                                      line=dict(color="red", dash="dash")))
+            # MTD Value Labels
+            fig.add_trace(go.Scatter(
+                x=df_d["Date"],
+                y=df_m[mtd_col],
+                mode="text",
+                text=[f"{v:.2f}" for v in df_m[mtd_col]],  # raw numeric values with 2 decimals
+                textposition="top center",
+                textfont=dict(size=14, color="green"),
+                showlegend=False,
+                hoverinfo="skip",  # This prevents it from showing in tooltip
+                name=""
+            ))
 
             fig.update_layout(
                 title=f"{sev} MTTR P90",
-                xaxis_title="Date",
-                yaxis_title="Hours",
+                xaxis=dict(
+                    title="Date",
+                    showgrid=False  # Hide vertical grid lines
+                ),
+                yaxis=dict(
+                    title="Hours",
+                    showgrid=False  # Hide horizontal grid lines
+                ),
                 height=350,
                 margin=dict(t=30, b=30),
-                legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
-                hovermode="x unified"
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=-0.25,           # Pushes legend below the chart
+                    xanchor="right",
+                    x=1,               # Right-align
+                    font=dict(size=14)
+                ),
+                hovermode="x unified",
+                hoverlabel=dict(
+                    bgcolor="mintcream",
+                    font_size=14,
+                    font_family="Arial"
+                )
             )
             col.plotly_chart(fig, use_container_width=True)
             #col.plotly_chart(fig, use_container_width=True, key=f"mttr_tab2_{sev}")
@@ -364,11 +435,12 @@ def app_tab2():
                 name="Daily (count)",
                 yaxis="y2",
                 marker_color="#2FB1F2",
-                opacity=0.6,
+                opacity=0.5,
                 text=df_d[daily_col],
-                textposition="outside",
+                textposition="inside",
                 insidetextanchor="start",
-                textfont=dict(size=14),
+                textfont=dict(size=16, color="black"),
+                hovertemplate=f"{title} Daily Count: "+"%{y}<extra></extra>"
             ))
 
             # Line: MTD percentage (left Y-axis)
@@ -377,7 +449,20 @@ def app_tab2():
                 y=mtd_series,
                 name="MTD (%)",
                 mode="lines+markers",
-                line=dict(color="green", width=3)
+                line=dict(color="green", width=3),
+                hovertemplate=f"{title} MTD: "+"%{y:.2f}%<extra></extra>"
+                #hovertemplate="MTD: %{y:.2f}%<extra></extra>"
+            ))
+            # Label: MTD percentage values (formatted as percent, no % symbol)
+            fig.add_trace(go.Scatter(
+                x=df_m["Date"],
+                y=mtd_series,
+                mode="text",
+                text=[f"{v:.2f}%" for v in mtd_series],  # Convert to percent
+                textposition="top center",
+                textfont=dict(size=14, color="green"),
+                showlegend=False,
+                hoverinfo="skip"
             ))
 
             # Line: Target (left Y-axis)
@@ -386,7 +471,8 @@ def app_tab2():
                 y=[target_val] * len(df_d),
                 name="Target",
                 mode="lines",
-                line=dict(color="red", dash="dash")
+                line=dict(color="red", dash="dash"),
+                hovertemplate="Target: %{y:.0f}%<extra></extra>"
             ))
 
             fig.update_layout(
@@ -396,8 +482,20 @@ def app_tab2():
                 yaxis2=dict(title="Daily Count", overlaying='y', side='right', showgrid=False),
                 height=350,
                 margin=dict(t=30, b=30),
-                legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
-                hovermode="x unified"
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=-0.25,           # Pushes legend below the chart
+                    xanchor="right",
+                    x=1,               # Right-align
+                    font=dict(size=14)
+                ),
+                hovermode="x unified",
+                hoverlabel=dict(
+                    bgcolor="mintcream",
+                    font_size=14,
+                    font_family="Arial"
+                )
             )
             
             col.plotly_chart(fig, use_container_width=True)
@@ -512,9 +610,13 @@ def app_tab3():
             fig.add_trace(go.Scatter(
                 x=df_m["Date"],
                 y=df_m[mtd_col],
-                mode="lines+markers",
+                mode="lines+markers+text",
                 name="MTD",
                 line=dict(color="green", width=3),
+                text=[f"{v:.2f}" for v in df_m[mtd_col]],
+                textposition="top center",
+                textfont=dict(size=14, color="green"),
+                hovertemplate="MTD: %{y:.2f}<extra></extra>",
             ))
 
             fig.add_trace(go.Scatter(
@@ -527,19 +629,37 @@ def app_tab3():
 
             fig.update_layout(
                 title=f"{sev} MTTR P90",
-                xaxis_title="Date",
-                yaxis_title="Hours",
+                xaxis=dict(
+                    title="Date",
+                    showgrid=False  # Hide vertical grid lines
+                ),
+                yaxis=dict(
+                    title="Hours",
+                    showgrid=False  # Hide horizontal grid lines
+                ),
                 height=350,
                 margin=dict(t=30, b=30),
                 hovermode="x unified",
+                hoverlabel=dict(
+                    bgcolor="mintcream",
+                    font_size=14,
+                    font_family="Arial"
+                ),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=-0.3,
+                    xanchor="right",
+                    x=1,
+                    font=dict(size=14)
+                )
             )
 
             #col.plotly_chart(fig, use_container_width=True)
             col.plotly_chart(fig, use_container_width=True, key=f"chart_{sev}")
-            
 
     # Add additional takeover/visit charts if needed for cluster
-    add_takeover_visit_charts(df_d, df_m, st, prefix="cluster")
+    add_takeover_visit_charts(df_d, df_m, st)
 
 def app_tab4():
     st.header("📈 Event Cluster - MTTR P90 & Operational Performance")
@@ -635,21 +755,53 @@ def app_tab4():
                                      fill="tozeroy", fillcolor="rgba(47, 177, 242, 0.2)"))
             fig.add_trace(go.Scatter(x=df_d["Date"], y=df_m[mtd_col],
                                      mode="lines+markers", name="MTD",
-                                     line=dict(color="green", width=3)))
+                                     line=dict(color="green", width=3),
+                                     hovertemplate="MTD: %{y:.2f}<extra></extra>"))
             fig.add_trace(go.Scatter(x=df_d["Date"], y=[target_val] * len(df_d),
                                      mode="lines", name="Target",
                                      line=dict(color="red", dash="dash")))
+            
+            # MTD Value Labels
+            fig.add_trace(go.Scatter(
+                x=df_d["Date"],
+                y=df_m[mtd_col],
+                mode="text",
+                text=[f"{v:.2f}" for v in df_m[mtd_col]],  # raw numeric values with 2 decimals
+                textposition="top center",
+                textfont=dict(size=14, color="green"),
+                showlegend=False,
+                hoverinfo="skip",  # This prevents it from showing in tooltip
+                name=""
+            ))
 
             fig.update_layout(
                 title=f"{sev} MTTR P90",
-                xaxis_title="Date",
-                yaxis_title="Hours",
+                xaxis=dict(
+                    title="Date",
+                    showgrid=False  # Hide vertical grid lines
+                ),
+                yaxis=dict(
+                    title="Hours",
+                    showgrid=False  # Hide horizontal grid lines
+                ),
                 height=350,
                 margin=dict(t=30, b=30),
-                legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
-                hovermode="x unified"
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=-0.25,           # Pushes legend below the chart
+                    xanchor="right",
+                    x=1,               # Right-align
+                    font=dict(size=14)
+                ),
+                hovermode="x unified",
+                hoverlabel=dict(
+                    bgcolor="mintcream",
+                    font_size=14,
+                    font_family="Arial"
+                )
             )
-            col.plotly_chart(fig, use_container_width=True, key=f"tab4_severity_chart_{i}_{sev}")
+            col.plotly_chart(fig, use_container_width=True)
 
     # Clean percentage columns
     percent_cols = ["EM-%TO-MTD", "EM-%TO-High-MTD", "EM-%TO-Low-MTD", "EM-%Visit-MTD"]
@@ -668,7 +820,7 @@ def app_tab4():
 
     for i in range(0, len(chart_specs), 2):
         col1, col2 = st.columns(2)
-        for j, (col, (title, daily_col, mtd_col, target_val)) in enumerate(zip([col1, col2], chart_specs[i:i+2])):
+        for col, (title, daily_col, mtd_col, target_val) in zip([col1, col2], chart_specs[i:i+2]):
             if daily_col not in df_d.columns or mtd_col not in df_m.columns:
                 col.warning(f"Missing columns for {title}")
                 continue
@@ -693,9 +845,10 @@ def app_tab4():
                 marker_color="#2FB1F2",
                 opacity=0.6,
                 text=df_d[daily_col],
-                textposition="outside",
+                textposition="inside",
                 insidetextanchor="start",
-                textfont=dict(size=10),
+                textfont=dict(size=16, color="black"),
+                hovertemplate=f"{title} Daily Count: "+"%{y}<extra></extra>"
             ))
 
             fig.add_trace(go.Scatter(
@@ -703,7 +856,19 @@ def app_tab4():
                 y=mtd_series,
                 name="MTD (%)",
                 mode="lines+markers",
-                line=dict(color="green", width=3)
+                line=dict(color="green", width=3),
+                hovertemplate=f"{title} MTD: "+"%{y:.2f}%<extra></extra>"
+            ))
+            # Label: MTD percentage values (formatted as percent, no % symbol)
+            fig.add_trace(go.Scatter(
+                x=df_m["Date"],
+                y=mtd_series,
+                mode="text",
+                text=[f"{v:.2f}%" for v in mtd_series],  # Convert to percent
+                textposition="top center",
+                textfont=dict(size=14, color="green"),
+                showlegend=False,
+                hoverinfo="skip"
             ))
 
             fig.add_trace(go.Scatter(
@@ -711,7 +876,8 @@ def app_tab4():
                 y=[target_val] * len(df_d),
                 name="Target",
                 mode="lines",
-                line=dict(color="red", dash="dash")
+                line=dict(color="red", dash="dash"),
+                hovertemplate="Target: %{y:.0f}%<extra></extra>"
             ))
 
             fig.update_layout(
@@ -721,14 +887,24 @@ def app_tab4():
                 yaxis2=dict(title="Daily Count", overlaying='y', side='right', showgrid=False),
                 height=350,
                 margin=dict(t=30, b=30),
-                legend=dict(x=1, y=1.2, xanchor="right", orientation="h"),
-                hovermode="x unified"
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=-0.25,           # Pushes legend below the chart
+                    xanchor="right",
+                    x=1,               # Right-align
+                    font=dict(size=14)
+                ),
+                hovermode="x unified",
+                hoverlabel=dict(
+                    bgcolor="mintcream",
+                    font_size=14,
+                    font_family="Arial"
+                )
             )
 
-            # ✅ FIXED: Add unique key
-            col.plotly_chart(fig, use_container_width=True, key=f"tab4_operational_chart_{i}_{j}_{title.replace(' ', '_')}")
-            print(f"Rendering chart: tab4_operational_chart_{i}_{j}_{title.replace(' ', '_')}")
-            
+            col.plotly_chart(fig, use_container_width=True)
+
 def app():
     # Create a row with the title on the left and button on the right
     col1, col2 = st.columns([10, 1])  # 6:1 ratio keeps the button narrow and aligned right

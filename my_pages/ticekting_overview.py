@@ -131,7 +131,7 @@ def plot_severity_charts(df, type_ticket, area, regional, nop, cluster):
             color="Severity",
             barmode="stack",
             title=f"Daily Tickets per Severity ({type_ticket}) - {filter_summary}",
-            color_discrete_sequence=px.colors.qualitative.Set1
+            color_discrete_sequence=px.colors.qualitative.Set2
         )
 
         # ✅ Remove bar hovertemplate to allow grouped tooltip
@@ -190,7 +190,7 @@ def plot_severity_charts(df, type_ticket, area, regional, nop, cluster):
             pie_data,
             names="Severity",
             values="Count",
-            color_discrete_sequence=px.colors.qualitative.Set3,
+            color_discrete_sequence=px.colors.qualitative.Set2,
             hole=0.3
         )
 

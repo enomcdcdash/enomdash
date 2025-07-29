@@ -68,6 +68,9 @@ def filter_severity_data(df):
 
 def plot_severity_charts(df, type_ticket, area, regional, nop, cluster):
     import plotly.express as px
+    import plotly.graph_objects as go
+    import streamlit as st
+    import pandas as pd
 
     # Determine severity columns
     if type_ticket == "Incident":
@@ -96,6 +99,7 @@ def plot_severity_charts(df, type_ticket, area, regional, nop, cluster):
     # Group and sum
     df_grouped = df.groupby(group_keys)[sev_cols].sum().reset_index()
     df_grouped["Total"] = df_grouped[sev_cols].sum(axis=1)
+    df_grouped["Date"] = pd.to_datetime(df_grouped["Date"])
 
     # Prepare for plotting
     df_melted = df_grouped.melt(
@@ -126,17 +130,18 @@ def plot_severity_charts(df, type_ticket, area, regional, nop, cluster):
             y="Count",
             color="Severity",
             barmode="stack",
-            title=f"Daily Tickets per Severity ({type_ticket}) - {filter_summary}"
+            title=f"Daily Tickets per Severity ({type_ticket}) - {filter_summary}",
+            color_discrete_sequence=px.colors.qualitative.Set3
         )
 
-        # Customize bar hover
+        # ✅ Remove bar hovertemplate to allow grouped tooltip
         fig.update_traces(
             selector=dict(type="bar"),
-            hovertemplate="<b>Date:</b> %{x}<br><b>Severity:</b> %{fullData.name}<br><b>Count:</b> %{y}<extra></extra>"
+            hovertemplate=None
         )
 
-        # Add green total line with labels
-        fig.add_scatter(
+        # ✅ Add green total line with custom tooltip
+        fig.add_trace(go.Scatter(
             x=df_grouped["Date"],
             y=df_grouped["Total"],
             mode="lines+markers+text",
@@ -145,19 +150,32 @@ def plot_severity_charts(df, type_ticket, area, regional, nop, cluster):
             marker=dict(size=6),
             text=df_grouped["Total"],
             textposition="top center",
-            hovertemplate="<b>Date:</b> %{x}<br><b>Total Tickets:</b> %{y}<extra></extra>"
-        )
+            hovertemplate="Total: %{y}<extra></extra>"
+        ))
 
         fig.update_layout(
             xaxis_title=None,
             yaxis_title=None,
             legend_title_text="",
             hovermode="x unified",
+            hoverlabel=dict(
+                bgcolor="mistyrose",
+                font_size=14,
+                font_family="Arial"
+            ),
             xaxis=dict(
                 tickmode='array',
                 tickvals=df_grouped["Date"],
-                tickformat="%d-%b",
+                tickformat="%d-%b-%y",  # ✅ show 11-Jul-25 format
                 tickangle=-45
+            ),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.4,
+                xanchor="right",
+                x=1,
+                font=dict(size=14)
             )
         )
 
@@ -172,6 +190,7 @@ def plot_severity_charts(df, type_ticket, area, regional, nop, cluster):
             pie_data,
             names="Severity",
             values="Count",
+            color_discrete_sequence=px.colors.qualitative.Set3,
             hole=0.3
         )
 
@@ -179,8 +198,9 @@ def plot_severity_charts(df, type_ticket, area, regional, nop, cluster):
             textinfo="label+value+percent",
             textposition="outside",
             textfont=dict(size=16),
-            insidetextorientation='radial',  # fallback for tight slices
-            showlegend=False
+            insidetextorientation='radial',
+            showlegend=False,
+            hovertemplate="<b>Severity:</b> %{label}<br><b>Count:</b> %{value}<br><b>Percent:</b> %{percent}<extra></extra>"
         )
 
         fig_pie.update_layout(
@@ -189,7 +209,11 @@ def plot_severity_charts(df, type_ticket, area, regional, nop, cluster):
             margin=dict(t=60, b=60, l=60, r=60),
             showlegend=False,
             uniformtext_minsize=12,
-            uniformtext_mode='hide'
+            uniformtext_mode='hide',
+            hoverlabel=dict(
+                bgcolor="mintcream",
+                font=dict(size=18, family="Arial")
+            )
         )
 
         st.plotly_chart(fig_pie, use_container_width=True)
@@ -259,7 +283,8 @@ def app_tab1(df_severity, df_rc_cat):
             df_pie_rc,
             names="RC Category",
             values="Total",
-            hole=0.3
+            hole=0.3,
+            color_discrete_sequence=px.colors.qualitative.Set2,
         )
         fig_rc.update_traces(
             textinfo="label+value+percent",
@@ -275,7 +300,11 @@ def app_tab1(df_severity, df_rc_cat):
             height=450,
             showlegend=False,
             uniformtext_minsize=12,
-            uniformtext_mode='hide'
+            uniformtext_mode='hide',
+            hoverlabel=dict(
+                bgcolor="mintcream",
+                font=dict(size=18, family="Arial")
+            )
         )
         st.plotly_chart(fig_rc, use_container_width=True)
 
@@ -285,7 +314,7 @@ def app_tab1(df_severity, df_rc_cat):
         styled_table = df_table[display_cols].style.set_table_attributes(
             'style="width:100%; border-collapse:collapse;"'
         ).set_table_styles([
-            {'selector': 'thead th', 'props': [('background-color', '#f0f0f0'), ('font-size', '20px'), ('text-align', 'center'), ('padding', '6px')]},
+            {'selector': 'thead th', 'props': [('background-color', "#8db7f2"), ('font-size', '20px'), ('text-align', 'center'), ('padding', '6px')]},
             {'selector': 'tbody td', 'props': [('font-size', '20px'), ('text-align', 'center'), ('padding', '6px')]},
             {'selector': 'tbody tr:nth-child(even)', 'props': [('background-color', '#fafafa')]},
             {'selector': 'tbody tr:nth-child(odd)', 'props': [('background-color', '#ffffff')]}
@@ -350,6 +379,7 @@ def filter_ticket_data(df):
     df_filtered = df_nop if selected_cluster == 'All' else df_nop[df_nop['Cluster TO'] == selected_cluster]
 
     return df_filtered, selected_area, selected_regional, selected_nop, selected_cluster, month, year
+
 
 def prepare_top20_table(df, ticket_type):
     suffix = f"_{ticket_type}"
@@ -438,7 +468,7 @@ def app_tab2(df_ticket, df_dpg):
 
     # Top 20 Recurring Sites Tables
     st.markdown("---")
-    st.markdown(f"### 🏅 Top 20 - All Site Classes – {filters_summary}")
+    st.markdown(f"### 🏅 Top 20 - All Sites – {filters_summary}")
     col_incident, col_event = st.columns(2)
 
     with col_incident:
@@ -465,7 +495,7 @@ def app():
     df_severity, df_rc_cat, df_ticket, df_dpg = load_ticketing_overview_data()
 
     tab1, tab2 = st.tabs([
-        "📊 Overview",
+        "📊 Severity Overview",
         "📄 Problematic Sites"
     ])
 

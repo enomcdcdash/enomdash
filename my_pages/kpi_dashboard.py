@@ -313,6 +313,44 @@ def app_tab1():
         # Render in Streamlit
         components.html(html_code, height=700, scrolling=True)
 
+    # --- Summary Score Cards for AREA 1 & 3 Combined ---
+    st.markdown("### 📋 Average Scores Summary")
+
+    # Calculate averages
+    sonl1_avg_area1 = df_area1["SON L1 Score"].mean()
+    somsa_avg_area1 = df_area1["SOMSA L0 Score"].mean()
+
+    sonl1_avg_area3 = df_area3["SON L1 Score"].mean()
+    somsa_avg_area3 = df_area3["SOMSA L0 Score"].mean()
+
+    df_combined = filtered_df[filtered_df["AREA"].isin(["AREA 1", "AREA 3"])]
+    combined_sonl1_avg = df_combined["SON L1 Score"].mean()
+    combined_somsa_avg = df_combined["SOMSA L0 Score"].mean()
+
+    # Define cards
+    card_data = [
+        ("AREA 1 — SON L1", f"{sonl1_avg_area1:.2f}", "#2980b9"),
+        ("AREA 1 — SOMSA L0", f"{somsa_avg_area1:.2f}", "#27ae60"),
+        ("AREA 3 — SON L1", f"{sonl1_avg_area3:.2f}", "#8e44ad"),
+        ("AREA 3 — SOMSA L0", f"{somsa_avg_area3:.2f}", "#16a085"),
+        ("AREA 1 & 3 — SON L1", f"{combined_sonl1_avg:.2f}", "#e67e22"),
+        ("AREA 1 & 3 — SOMSA L0", f"{combined_somsa_avg:.2f}", "#c0392b"),
+    ]
+
+    # Layout
+    cols = st.columns(len(card_data))
+    for idx, (label, value, color) in enumerate(card_data):
+        with cols[idx]:
+            st.markdown(
+                f"""
+                <div style="background-color:{color};padding:12px;border-radius:10px;text-align:center">
+                    <h4 style="color:white;margin:0;font-size:18px">{label}</h4>
+                    <p style="font-size:28px;color:white;margin:0"><strong>{value}</strong></p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -469,3 +507,4 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+

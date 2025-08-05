@@ -314,7 +314,7 @@ def app_tab1():
         components.html(html_code, height=700, scrolling=True)
 
     # --- Summary Score Cards for AREA 1 & 3 Combined ---
-    st.markdown("### 📋 Average Scores Summary")
+    st.markdown(f"### 📋 Average Scores Summary — {month} {year}")
 
     # Calculate averages
     sonl1_avg_area1 = df_area1["SON L1 Score"].mean()
@@ -507,4 +507,5 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+
 

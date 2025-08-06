@@ -183,7 +183,7 @@ def app_tab1():
         left_align_css = ", ".join([f'td.{idx}' for idx in left_align_indexes])
 
         html_code = f"""
-        <div width:100%; padding: 10px;">
+        <div style="overflow-x: auto; width: 100%;">
             <style>
                 table {{
                     width: 100% !important;
@@ -277,7 +277,7 @@ def app_tab1():
         # Final HTML with professional styles
         # Final HTML with professional styles
         html_code = f"""
-        <div width:100%; padding: 10px;">
+        <div style="overflow-x: auto; width: 100%;">
             <style>
                 table {{
                     width: 100% !important;
@@ -506,3 +506,4 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+

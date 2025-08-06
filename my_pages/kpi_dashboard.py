@@ -126,7 +126,7 @@ def app_tab1():
             )
 
     # --- Tables AREA 1 & AREA 3 ---
-    col1, col2 = st.columns([1, 1])
+    col1, col2 = st.columns(2)
 
     # --- AREA 1 ---
     with col1:
@@ -217,7 +217,7 @@ def app_tab1():
         """
 
         # Important: scrolling=False to prevent internal scrollbars
-        components.html(html_code, height=700, scrolling=True)
+        components.html(html_code, height=700, scrolling=False)
 
     # --- AREA 3 ---
     with col2:
@@ -506,5 +506,3 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
-
-

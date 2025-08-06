@@ -184,40 +184,42 @@ def app_tab1():
 
         # Final HTML with professional styles
         html_code = f"""
-        <div style="width: 100vw; padding: 10px; overflow-x: visible;">
-            <style>
-                table {{
-                    width: 100%;
-                    border-collapse: collapse;
-                    font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-                    font-size: 14px;
-                    color: #333;
-                }}
-                th, td {{
-                    padding: 8px;
-                    text-align: center;
-                    vertical-align: middle;
-                    border: 1px solid #ccc;
-                    white-space: normal;
-                    word-wrap: break-word;
-                }}
-                th {{
-                    background-color: #f2f2f2;
-                    font-weight: 600;
-                }}
-                {left_align_css} {{
-                    text-align: left !important;
-                }}
-                tr:nth-child(even) {{
-                    background-color: #fafafa;
-                }}
-            </style>
-            {table_html}
+        <div style="display: flex; justify-content: center; width: 100%;">
+            <div style="min-width: 100%; overflow-x: auto;">
+                <style>
+                    table {{
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+                        font-size: 14px;
+                        color: #333;
+                    }}
+                    th, td {{
+                        padding: 8px;
+                        text-align: center;
+                        vertical-align: middle;
+                        border: 1px solid #ccc;
+                        white-space: normal;
+                        word-wrap: break-word;
+                    }}
+                    th {{
+                        background-color: #f2f2f2;
+                        font-weight: 600;
+                    }}
+                    {left_align_css} {{
+                        text-align: left !important;
+                    }}
+                    tr:nth-child(even) {{
+                        background-color: #fafafa;
+                    }}
+                </style>
+                {table_html}
+            </div>
         </div>
         """
 
-        # Render full-width table in Streamlit
-        components.html(html_code, height=700, scrolling=False)
+        # Important: scrolling=False to prevent internal scrollbars
+        components.html(html_code, height=800, scrolling=False)
 
     # --- AREA 3 ---
     with col2:
@@ -506,6 +508,7 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+
 
 
 

@@ -309,7 +309,7 @@ def app_tab1():
         """
 
         # Render in Streamlit
-        components.html(html_code, height=700, scrolling=True)
+        components.html(html_code, height=700, scrolling=False, width=0)
     
     # --- Summary Score Cards for AREA 1 & 3 Combined ---
     st.markdown(f"### 📋 Average Scores Summary — {month} {year}")
@@ -504,5 +504,6 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+
 
 

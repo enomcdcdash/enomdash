@@ -197,10 +197,12 @@ def app_tab1():
                 }}
                 th, td {{
                     padding: 5px !important;
-                    white-space: nowrap;
+                    white-space: normal !important;
+                    word-break: break-word !important;
                     text-align: center !important;
                     vertical-align: middle !important;
                     border: 1px solid #ccc;
+                    max-width: 220px;
                 }}
                 th {{
                     background-color: #f2f2f2;
@@ -507,6 +509,7 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+
 
 
 

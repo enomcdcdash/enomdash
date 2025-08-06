@@ -310,7 +310,7 @@ def app_tab1():
             {table_html}
         </div>
         """
-        st.markdown(html_code_wrapped, unsafe_allow_html=True)
+        st.markdown(html_code, unsafe_allow_html=True)
         # Render in Streamlit
         # components.html(html_code, height=700, scrolling=True)
     
@@ -507,5 +507,6 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+
 
 

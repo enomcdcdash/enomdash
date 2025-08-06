@@ -107,6 +107,7 @@ def app_tab1():
 
     # --- KPI Summary for AREA 1 & 3 ---
     st.markdown("### 📊 SONL 1 Score Category Count (AREA 1 & AREA 3)")
+    html_code = None  # <-- Declare upfront to avoid UnboundLocalError
 
     filtered_df_area_1_3 = filtered_df[filtered_df["AREA"].isin(["AREA 1", "AREA 3"])]
     score_counts = filtered_df_area_1_3["SONL 1 Score Category"].value_counts().reindex(score_categories.keys(), fill_value=0)
@@ -483,6 +484,7 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+
 
 
 

@@ -182,41 +182,43 @@ def app_tab1():
         # Build CSS to apply left alignment to specific columns
         left_align_css = ", ".join([f'td.{idx}' for idx in left_align_indexes])
 
-        # Final HTML with professional styles
         html_code = f"""
-        <style>
-            .full-width-table table {{
-                width: 100% !important;
-                table-layout: auto;
-                border-collapse: collapse;
-                font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-                font-size: 14px;
-                color: #333;
-                border: 1px solid #ccc;
-            }}
-            .full-width-table th, .full-width-table td {{
-                padding: 6px;
-                text-align: center;
-                vertical-align: middle;
-                border: 1px solid #ccc;
-                white-space: nowrap;
-            }}
-            .full-width-table th {{
-                background-color: #f2f2f2;
-                font-weight: bold;
-            }}
-            .full-width-table tr:nth-child(even) {{
-                background-color: #fafafa;
-            }}
-        </style>
-        
-        <div class="full-width-table">
+        <div width:100%; padding: 10px;">
+            <style>
+                table {{
+                    width: 100% !important;
+                    table-layout: auto !important;
+                    border-collapse: collapse !important;
+                    font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+                    font-size: 14px !important;
+                    color: #333 !important;
+                    border: 1px solid #ccc;
+                }}
+                th, td {{
+                    padding: 5px !important;
+                    white-space: nowrap;
+                    text-align: center !important;
+                    vertical-align: middle !important;
+                    border: 1px solid #ccc;
+                }}
+                th {{
+                    background-color: #f2f2f2;
+                    font-weight: 600;
+                }}
+                {left_align_css} {{
+                    text-align: left !important;
+                }}
+                tr:nth-child(even) {{
+                    background-color: #fafafa;
+                }}
+            </style>
             {table_html}
         </div>
         """
-        
-        st.markdown(html_code, unsafe_allow_html=True)
-        
+
+        # Important: scrolling=False to prevent internal scrollbars
+        components.html(html_code, height=700, scrolling=False)
+
     # --- AREA 3 ---
     with col2:
         st.subheader(f"📍 AREA 3 — {month} {year}")
@@ -273,8 +275,9 @@ def app_tab1():
         left_align_css = ", ".join([f'td.{idx}' for idx in left_align_indexes])
 
         # Final HTML with professional styles
+        # Final HTML with professional styles
         html_code = f"""
-        <div "width:100%; padding: 10px;">
+        <div width:100%; padding: 10px;">
             <style>
                 table {{
                     width: 100% !important;
@@ -308,7 +311,7 @@ def app_tab1():
         """
 
         # Render in Streamlit
-        components.html(html_code, height=700, scrolling=False, width=0)
+        components.html(html_code, height=700, scrolling=True)
     
     # --- Summary Score Cards for AREA 1 & 3 Combined ---
     st.markdown(f"### 📋 Average Scores Summary — {month} {year}")
@@ -503,8 +506,3 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
-
-
-
-
-

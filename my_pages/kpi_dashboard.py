@@ -215,9 +215,10 @@ def app_tab1():
             {table_html}
         </div>
         """
-
+        st.markdown(html_code, unsafe_allow_html=True)
         # Important: scrolling=False to prevent internal scrollbars
-        components.html(html_code, height=700, scrolling=False)
+        # components.html(html_code, height=700, scrolling=False)
+        
 
     # --- AREA 3 ---
     with col2:
@@ -506,3 +507,4 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+

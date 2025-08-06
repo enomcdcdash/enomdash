@@ -126,7 +126,7 @@ def app_tab1():
             )
 
     # --- Tables AREA 1 & AREA 3 ---
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([1, 1])
 
     # --- AREA 1 ---
     with col1:
@@ -506,4 +506,5 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+
 

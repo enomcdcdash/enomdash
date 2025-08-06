@@ -184,43 +184,42 @@ def app_tab1():
 
         # Final HTML with professional styles
         html_code = f"""
-        <div style="display: flex; justify-content: center; width: 100%;">
-            <div style="min-width: 100%; overflow-x: auto;">
-                <style>
-                    table {{
-                        width: 100%;
-                        border-collapse: collapse;
-                        font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-                        font-size: 14px;
-                        color: #333;
-                    }}
-                    th, td {{
-                        padding: 8px;
-                        text-align: center;
-                        vertical-align: middle;
-                        border: 1px solid #ccc;
-                        white-space: normal;
-                        word-wrap: break-word;
-                    }}
-                    th {{
-                        background-color: #f2f2f2;
-                        font-weight: 600;
-                    }}
-                    {left_align_css} {{
-                        text-align: left !important;
-                    }}
-                    tr:nth-child(even) {{
-                        background-color: #fafafa;
-                    }}
-                </style>
-                {table_html}
-            </div>
+        <div style="min-width: 1600px; overflow-x: auto; padding: 10px;">
+            <style>
+                table {{
+                    width: 100% !important;
+                    table-layout: auto !important;
+                    border-collapse: collapse !important;
+                    font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+                    font-size: 14px !important;
+                    color: #333 !important;
+                    border: 1px solid #ccc;
+                }}
+                th, td {{
+                    padding: 5px !important;
+                    white-space: normal !important;
+                    word-break: break-word !important;
+                    text-align: center !important;
+                    vertical-align: middle !important;
+                    border: 1px solid #ccc;
+                    max-width: 220px;
+                }}
+                th {{
+                    background-color: #f2f2f2;
+                    font-weight: 600;
+                }}
+                {left_align_css} {{
+                    text-align: left !important;
+                }}
+                tr:nth-child(even) {{
+                    background-color: #fafafa;
+                }}
+            </style>
+            {table_html}
         </div>
         """
-
-        # Important: scrolling=False to prevent internal scrollbars
-        components.html(html_code, height=800, scrolling=False)
-
+        components.html(html_code, height=700, scrolling=True)
+        
     # --- AREA 3 ---
     with col2:
         st.subheader(f"📍 AREA 3 — {month} {year}")
@@ -507,3 +506,4 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+

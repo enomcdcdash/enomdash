@@ -184,7 +184,7 @@ def app_tab1():
 
         # Final HTML with professional styles
         html_code = f"""
-        <div width:100%; padding: 10px;">
+        <"div width:100%; padding: 10px;">
             <style>
                 table {{
                     width: 100% !important;
@@ -277,7 +277,7 @@ def app_tab1():
 
         # Final HTML with professional styles
         html_code = f"""
-        <div width:100%; padding: 10px;">
+        <"div width:100%; padding: 10px;">
             <style>
                 table {{
                     width: 100% !important;
@@ -507,5 +507,6 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+
 
 

@@ -451,7 +451,8 @@ def render_colored_table(df, week_columns):
         </table>
     </div>
     """
-    components.html(table_html, height=600, scrolling=False)
+    #components.html(table_html, height=600, scrolling=False)
+    st.markdown(table_html, unsafe_allow_html=True)
 
 def app_tab2():
     st.subheader("🧑‍🔧 Rekap Resource")
@@ -603,3 +604,4 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+

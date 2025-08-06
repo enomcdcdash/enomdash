@@ -131,76 +131,76 @@ def app_tab1():
 
     # --- AREA 1 ---
     with col1:
-    st.subheader(f"📍 AREA 1 — {month} {year}")
-
-    html_code = None  # Prevent UnboundLocalError
-
-    df_area1 = filtered_df[filtered_df["AREA"] == "AREA 1"].copy()
-
-    if not df_area1.empty:
-        df_area1["REGIONAL"] = pd.Categorical(
-            df_area1["REGIONAL"],
-            categories=["R01 SUMBAGUT", "R10 SUMBAGTENG", "R02 SUMBAGSEL"],
-            ordered=True
-        )
-        df_area1 = df_area1.sort_values(["REGIONAL", "NOP"])
-
-        df_area1_display_full = df_area1[display_cols + ["SONL 1 Score Category"]].reset_index(drop=True)
-        df_area1_display_full.index += 1
-
-        styled_df_visible = df_area1_display_full.drop(columns=["SONL 1 Score Category"]).style \
-            .format({"SON L1 Score": "{:.2f}", "SOMSA L0 Score": "{:.2f}"}) \
-            .apply(highlight_sonl1_score, axis=1) \
-            .apply(highlight_status, axis=1) \
-            .set_properties(**alignment_style)
-
-        table_html = styled_df_visible.to_html(escape=False)
-        columns = styled_df_visible.columns.tolist()
-        left_align_cols = ["REGIONAL", "NOP"]
-        left_align_indexes = [f"col{i}" for i, col in enumerate(columns) if col in left_align_cols]
-        left_align_css = ", ".join([f'td.{idx}' for idx in left_align_indexes])
-
-        html_code = f"""
-        <div style="overflow-x: auto; width: 100%;">
-            <div style="min-width: 800px;">
-                <style>
-                    table {{
-                        width: 100%;
-                        table-layout: auto;
-                        border-collapse: collapse;
-                        font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-                        font-size: 14px;
-                        color: #333;
-                        border: 1px solid #ccc;
-                    }}
-                    th, td {{
-                        padding: 5px;
-                        white-space: nowrap;
-                        text-align: center;
-                        vertical-align: middle;
-                        border: 1px solid #ccc;
-                    }}
-                    th {{
-                        background-color: #f2f2f2;
-                        font-weight: 600;
-                    }}
-                    {left_align_css} {{
-                        text-align: left !important;
-                    }}
-                    tr:nth-child(even) {{
-                        background-color: #fafafa;
-                    }}
-                </style>
-                {table_html}
+        st.subheader(f"📍 AREA 1 — {month} {year}")
+    
+        html_code = None  # Prevent UnboundLocalError
+    
+        df_area1 = filtered_df[filtered_df["AREA"] == "AREA 1"].copy()
+    
+        if not df_area1.empty:
+            df_area1["REGIONAL"] = pd.Categorical(
+                df_area1["REGIONAL"],
+                categories=["R01 SUMBAGUT", "R10 SUMBAGTENG", "R02 SUMBAGSEL"],
+                ordered=True
+            )
+            df_area1 = df_area1.sort_values(["REGIONAL", "NOP"])
+    
+            df_area1_display_full = df_area1[display_cols + ["SONL 1 Score Category"]].reset_index(drop=True)
+            df_area1_display_full.index += 1
+    
+            styled_df_visible = df_area1_display_full.drop(columns=["SONL 1 Score Category"]).style \
+                .format({"SON L1 Score": "{:.2f}", "SOMSA L0 Score": "{:.2f}"}) \
+                .apply(highlight_sonl1_score, axis=1) \
+                .apply(highlight_status, axis=1) \
+                .set_properties(**alignment_style)
+    
+            table_html = styled_df_visible.to_html(escape=False)
+            columns = styled_df_visible.columns.tolist()
+            left_align_cols = ["REGIONAL", "NOP"]
+            left_align_indexes = [f"col{i}" for i, col in enumerate(columns) if col in left_align_cols]
+            left_align_css = ", ".join([f'td.{idx}' for idx in left_align_indexes])
+    
+            html_code = f"""
+            <div style="overflow-x: auto; width: 100%;">
+                <div style="min-width: 800px;">
+                    <style>
+                        table {{
+                            width: 100%;
+                            table-layout: auto;
+                            border-collapse: collapse;
+                            font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+                            font-size: 14px;
+                            color: #333;
+                            border: 1px solid #ccc;
+                        }}
+                        th, td {{
+                            padding: 5px;
+                            white-space: nowrap;
+                            text-align: center;
+                            vertical-align: middle;
+                            border: 1px solid #ccc;
+                        }}
+                        th {{
+                            background-color: #f2f2f2;
+                            font-weight: 600;
+                        }}
+                        {left_align_css} {{
+                            text-align: left !important;
+                        }}
+                        tr:nth-child(even) {{
+                            background-color: #fafafa;
+                        }}
+                    </style>
+                    {table_html}
+                </div>
             </div>
-        </div>
-        """
-
-    # Only call components.html if html_code is safely defined
-    if html_code is not None:
-        components.html(html_code, height=700, scrolling=False)
-    else:
-        st.warning("No data available for AREA 1.")
+            """
+    
+        # Only call components.html if html_code is safely defined
+        if html_code is not None:
+            components.html(html_code, height=700, scrolling=False)
+        else:
+            st.warning("No data available for AREA 1.")
         
     # --- AREA 3 ---
     with col2:
@@ -489,6 +489,7 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+
 
 
 

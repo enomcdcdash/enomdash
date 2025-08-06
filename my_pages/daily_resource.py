@@ -717,8 +717,8 @@ def app_tab2():
             </table>
         </div>
         """
-
-        components.html(table_html, height=850, scrolling=False)
+        st.markdown(table_html, unsafe_allow_html=True)
+        #components.html(table_html, height=850, scrolling=False)
 
 
     # --- Compute IM/EM Visit ---
@@ -811,3 +811,4 @@ def app():
 
     with tab2:
         app_tab2()
+

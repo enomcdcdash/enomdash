@@ -217,7 +217,7 @@ def app_tab1():
         """
 
         # Important: scrolling=False to prevent internal scrollbars
-        components.html(html_code, height=700, scrolling=False)
+        components.html(html_code, height=700, scrolling=True)
 
     # --- AREA 3 ---
     with col2:
@@ -506,3 +506,4 @@ def app():
         app_tab1()
     with tab2:
         app_tab2()
+

@@ -792,6 +792,271 @@ def app_tab2():
         mime="text/csv"
     )
 
+def render_html_table_with_scroll(df):
+    styles = """
+    <style>
+    .table-container {
+        width: 100%;
+        max-height: 400px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border: 1px solid #ddd;
+    }
+    table {
+        border-collapse: collapse;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 14px;
+        min-width: 800px;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    thead th {
+        background-color: #4a90e2;
+        color: white;
+        font-size: 16px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    tbody tr:nth-child(even) {
+        background-color: #f5f7fa;
+    }
+    tbody tr:hover {
+        background-color: #d0e4f5;
+    }
+    .total-col {
+        font-weight: bold;
+        font-size: 18px;
+        background-color: #fffbcc;
+    }
+    .green-bg {
+        background-color: #d4edda; /* light green */
+        color: #155724;
+        font-weight: bold;
+    }
+    .orange-bg {
+        background-color: #ffe5b4; /* light orange */
+        color: #7f4b00;
+        font-weight: bold;
+    }
+    .red-bg {
+        background-color: #f8d7da; /* light red */
+        color: #721c24;
+        font-weight: bold;
+    }
+    </style>
+    """
+
+    df_formatted = df.copy()
+    # Format numeric columns as int (whole numbers)
+    for col in df_formatted.columns:
+        if col not in ["Regional name", "Nop name", "Pic name"]:
+            try:
+                df_formatted[col] = pd.to_numeric(df_formatted[col], errors='coerce').fillna(0).astype(int)
+            except Exception:
+                pass
+
+    def style_cell(col_name, val):
+        # Style only date columns (excluding 'Total' and text columns)
+        if col_name == "Total":
+            return f'<td class="total-col">{val}</td>'
+        elif col_name not in ["Regional name", "Nop name", "Pic name"]:
+            # Apply color coding
+            if val >= 2:
+                return f'<td class="green-bg">{val}</td>'
+            elif val == 1:
+                return f'<td class="orange-bg">{val}</td>'
+            else:
+                return f'<td class="red-bg">{val}</td>'
+        else:
+            # Default style for text columns
+            return f'<td>{val}</td>'
+
+    table_html = "<table><thead><tr>"
+    for col in df_formatted.columns:
+        table_html += f"<th>{col}</th>"
+    table_html += "</tr></thead><tbody>"
+    for _, row in df_formatted.iterrows():
+        row_html = ""
+        for i, val in enumerate(row):
+            col_name = df_formatted.columns[i]
+            row_html += style_cell(col_name, val)
+        table_html += f"<tr>{row_html}</tr>"
+    table_html += "</tbody></table>"
+
+    return styles + f"<div class='table-container'>{table_html}</div>"
+
+def app_tab3():
+    st.subheader("📊 Rekap Tiket FNA Daily")
+
+    # --- Load data ---
+    df = load_daily_resource_data(sheet_name="Daily FNA")
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+
+    # --- Get full min/max before filtering ---
+    min_date, max_date = df["Date"].min(), df["Date"].max()
+
+    # --- Filters in one row ---
+    col_date, col1, col2, col3 = st.columns([2, 1, 1, 1])  # Wider col for date
+
+    with col_date:
+        date_range = st.date_input(
+            "Select Date Range",
+            value=(min_date, max_date),
+            min_value=min_date,
+            max_value=max_date
+        )
+
+    if not isinstance(date_range, tuple) or len(date_range) != 2:
+        st.error("Please select a valid date range.")
+        return
+
+    start_date, end_date = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
+
+    # Filter by selected date range
+    filtered_df = df[(df["Date"] >= start_date) & (df["Date"] <= end_date)]
+
+    if filtered_df.empty:
+        st.warning("No data found in the selected date range.")
+        return
+
+    with col1:
+        regional_options = sorted(filtered_df["Regional name"].dropna().unique())
+        selected_regional = st.selectbox("Regional name", options=["-- All --"] + regional_options)
+
+    if selected_regional != "-- All --":
+        filtered_df = filtered_df[filtered_df["Regional name"] == selected_regional]
+
+    with col2:
+        nop_options = sorted(filtered_df["Nop name"].dropna().unique())
+        if nop_options:
+            selected_nop = st.selectbox("Nop name", options=["-- All --"] + nop_options)
+        else:
+            st.warning("No Nop name available for selected Regional name.")
+            return
+
+    if selected_nop != "-- All --":
+        filtered_df = filtered_df[filtered_df["Nop name"] == selected_nop]
+
+    with col3:
+        pic_options = sorted(filtered_df["Pic name"].dropna().unique())
+        if pic_options:
+            selected_pic = st.selectbox("Pic name", options=["-- All --"] + pic_options)
+        else:
+            st.warning("No Pic name available for selected filters.")
+            return
+
+    if selected_pic != "-- All --":
+        filtered_df = filtered_df[filtered_df["Pic name"] == selected_pic]
+
+    if filtered_df.empty:
+        st.warning("No data found for selected filters.")
+        return
+
+    # --- Create pivot table ---
+    pivot_df = (
+        filtered_df.groupby(["Regional name", "Nop name", "Pic name", "Date"])
+        .size()
+        .reset_index(name="Count")
+        .pivot_table(
+            index=["Regional name", "Nop name", "Pic name"],
+            columns="Date",
+            values="Count",
+            fill_value=0
+        )
+    )
+
+    all_dates = pd.date_range(start=start_date, end=end_date)
+    pivot_df = pivot_df.reindex(columns=all_dates, fill_value=0)
+
+    pivot_df["Total"] = pivot_df.sum(axis=1)
+
+    pivot_df = pivot_df[["Total"] + list(all_dates)]
+
+    pivot_df.columns = ["Total"] + [d.strftime("%Y-%m-%d") for d in all_dates]
+
+    display_df = pivot_df.reset_index()
+
+    # --- Aggregate daily counts for line chart ---
+    daily_counts = (
+        filtered_df.groupby("Date")
+        .size()
+        .reindex(all_dates, fill_value=0)
+        .rename("Count")
+        .reset_index()
+    )
+    daily_counts.columns = ["Date", "Count"]
+
+    #st.markdown("### 📈 Daily FNA Chart")
+    # st.line_chart(data=daily_counts.set_index("Date"))
+    # Assuming daily_counts is your DataFrame with columns: "Date" and "Count"
+    fig = px.line(
+        daily_counts,
+        x="Date",
+        y="Count",
+        labels={"Date": "Date", "Count": "FNA"},
+        title="📈 Daily FNA Chart"
+    )
+
+    fig.update_traces(
+        mode="lines+markers+text",        # Show line, markers, and text labels
+        line=dict(width=4),               # Thicker line (default is 2)
+        text=daily_counts["Count"],       # Label each data point with count
+        textposition="top center",         # Position labels above markers
+        textfont=dict(
+            size=14,          # font size in pixels
+            family="Arial",   # optional font family
+            color="black"     # optional font color
+        ),
+        hovertemplate= 'Ticket FNA : %{y}<extra></extra>'
+    )
+
+    max_y = daily_counts["Count"].max()
+    min_y = 0  # or daily_counts["Count"].min() if you want dynamic min
+    fig.update_layout(
+        xaxis=dict(
+            tickformat="%Y-%m-%d",
+            tickangle=-45,
+            dtick="D1",
+            showgrid=False              # Hide x-axis gridlines
+        ),
+        yaxis=dict(
+        showgrid=True,
+            gridcolor='LightGray',
+            range=[min_y, max_y + 3]   # set y-axis range with padding
+        ),
+        plot_bgcolor="white",
+        title_font=dict(size=24),
+        xaxis_title_font=dict(size=18),
+        yaxis_title_font=dict(size=18),
+        xaxis_tickfont=dict(size=14),
+        yaxis_tickfont=dict(size=14),
+        hovermode="x unified",
+        hoverlabel=dict(
+            bgcolor="azure",      # background color of hover label
+            font_size=14,         # font size in px
+            font_family="Arial",  # font family
+            font_color="black",   # font color
+            bordercolor="gray"    # border color of hover label box
+        ),
+        height=650
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    display_df["Total"] = pd.to_numeric(display_df["Total"], errors='coerce').fillna(0).astype(int)
+    display_df_sorted = display_df.sort_values(
+        by=["Regional name", "Nop name", "Total"],
+        ascending=[True, True, False]
+    ).reset_index(drop=True)
+    
+    html_table = render_html_table_with_scroll(display_df_sorted)
+    st.markdown(html_table, unsafe_allow_html=True)
+
 def app():
     col1, col2 = st.columns([9, 1])
 
@@ -804,11 +1069,17 @@ def app():
             st.rerun()
             
     
-    tab1, tab2 = st.tabs(["🎟️ Rekap Tiket Daily", "📊 Daily Rekap Resource"])
+    tab1, tab2, tab3 = st.tabs(["🎟️ Rekap Tiket Daily", "📊 Daily Rekap Resource", "Daily FNA"])
 
     with tab1:
         app_tab1()
 
     with tab2:
         app_tab2()
+
+    with tab3:
+        app_tab3()
+
+
+
 

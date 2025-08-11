@@ -286,7 +286,7 @@ def load_ticketing_overview_data():
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
 @st.cache_data(ttl=3600)
-def load_daily_resource_data(sheet_name="Ticket Summary"):
+def load_daily_resource_data_old(sheet_name="Ticket Summary"):
     try:
         drive = get_drive()
         file_list = drive.ListFile({'q': f"'{FOLDER_ID}' in parents and trashed=false"}).GetList()
@@ -327,3 +327,52 @@ def load_daily_resource_data(sheet_name="Ticket Summary"):
     except Exception as e:
         print(f"[ERROR] Failed to load resource data ({sheet_name}): {e}")
         return pd.DataFrame()
+
+@st.cache_data(ttl=3600)
+def download_resource_files(folder_id, prefix="dailyresource", extension=".xlsx"):
+    drive = get_drive()
+    file_list = drive.ListFile({'q': f"'{folder_id}' in parents and trashed=false"}).GetList()
+
+    resource_files = [f for f in file_list if f['title'].lower().startswith(prefix) and f['title'].endswith(extension)]
+    local_files = []
+    cache_dir = ".cache"
+    os.makedirs(cache_dir, exist_ok=True)
+
+    for file in resource_files:
+        filename = file['title']
+        filepath = os.path.join(cache_dir, filename)
+
+        if not os.path.exists(filepath):
+            file.GetContentFile(filepath)
+
+        local_files.append(filepath)
+
+    return local_files
+
+@st.cache_data(ttl=3600)
+def load_daily_resource_data(sheet_name="Ticket Summary"):
+    folder_id = "16UY4IslY4KFTo5O1I6MBMzuPF9IQGwuE"  # your Drive folder ID
+    files = download_resource_files(folder_id=folder_id)
+
+    df_list = []
+    for filepath in files:
+        try:
+            df = pd.read_excel(filepath, sheet_name=sheet_name, engine="openpyxl")
+            df.columns = (
+                df.columns
+                .str.replace(r"\xa0", " ", regex=True)
+                .str.replace(r"[–‐‑−]", "-", regex=True)
+                .str.strip()
+            )
+            df['Source File'] = os.path.basename(filepath)
+            df_list.append(df)
+        except Exception as e:
+            print(f"[ERROR] Failed to load {filepath} sheet {sheet_name}: {e}")
+
+    if df_list:
+        combined_df = pd.concat(df_list, ignore_index=True)
+        combined_df.drop_duplicates(inplace=True)
+        return combined_df
+    else:
+        return pd.DataFrame()
+

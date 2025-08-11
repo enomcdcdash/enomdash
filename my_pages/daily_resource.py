@@ -1028,7 +1028,7 @@ def app_tab3():
         yaxis=dict(
         showgrid=True,
             gridcolor='LightGray',
-            range=[min_y, max_y + 3]   # set y-axis range with padding
+            range=[min_y, max_y + 5]   # set y-axis range with padding
         ),
         plot_bgcolor="white",
         title_font=dict(size=24),
@@ -1080,6 +1080,7 @@ def app():
 
     with tab3:
         app_tab3()
+
 
 
 

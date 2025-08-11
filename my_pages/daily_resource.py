@@ -5,6 +5,7 @@ from utils.data_loader import load_daily_resource_data
 import streamlit.components.v1 as components
 import numpy as np
 import plotly.express as px
+import io
 
 def app_tab1():
     st.subheader("📊 Daily Team Productivity")
@@ -1057,6 +1058,24 @@ def app_tab3():
     
     html_table = render_html_table_with_scroll(display_df_sorted)
     st.markdown(html_table, unsafe_allow_html=True)
+    # Convert DataFrame to Excel bytes
+    def to_excel_bytes(df):
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Sheet1')
+            writer.save()
+        return output.getvalue()
+
+    # Prepare Excel bytes from your sorted df
+    excel_data = to_excel_bytes(display_df_sorted)
+
+    # Add Streamlit download button
+    st.download_button(
+        label="📥 Download Rekap FNA",
+        data=excel_data,
+        file_name="rekap_fna_daily.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 def app():
     col1, col2 = st.columns([9, 1])
@@ -1080,6 +1099,7 @@ def app():
 
     with tab3:
         app_tab3()
+
 
 
 

@@ -1063,7 +1063,6 @@ def app_tab3():
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df.to_excel(writer, index=False, sheet_name='Sheet1')
-            writer.save()
         return output.getvalue()
 
     # Prepare Excel bytes from your sorted df
@@ -1099,6 +1098,7 @@ def app():
 
     with tab3:
         app_tab3()
+
 
 
 

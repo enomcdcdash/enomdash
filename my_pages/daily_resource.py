@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 from utils.data_loader import load_daily_resource_data
 import streamlit.components.v1 as components
 import numpy as np
+import plotly.express as px
 
 def app_tab1():
     st.subheader("📊 Daily Team Productivity")
@@ -1079,6 +1080,7 @@ def app():
 
     with tab3:
         app_tab3()
+
 
 
 
